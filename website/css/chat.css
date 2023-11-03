@@ -1,4 +1,5 @@
 
+
 /* Chat overlay */
 #chatContainer{
     position: absolute;
@@ -6,13 +7,30 @@
     right: 0;
     margin: auto;
     border: 4px solid rgb(0, 0, 0);
-    background-color: rgba(255, 255, 255, 0.075);
+    background-color: rgba(53, 53, 53, 0.555);
     border-radius: 15px;
-    padding: 0 2% 2% 2%;
+    padding: 2% 2% 2% 2%;
     width: fit-content;
-    height: fit-content;
-    max-width: 80%;
-    max-height: 75%;
+    max-width: 80vw;
+    height: 90vh ;
+}
+#chatsHandler{
+    overflow: scroll;
+    height: 80%;
+    display: inline-block;
+    size: fixed;
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+#chatsHandler::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+#chatsHandler {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 /* Chat top banner */
 #chatPartner {
@@ -44,22 +62,22 @@
 }
 /* sent chat container */
 .received{
-    --_d: 100%;
-    border-right: var(--t) solid #ffffff00;
-    margin-left: var(--t);
-    place-self: end;
-    margin-left: auto;
-    margin-right: 0;
-    background-color: #1a354b;
 
-}
-/* received chat container */
-.sent {
-    --_d: 0%;
+--_d: 0%;
     border-left: var(--t) solid #ffffff00;
     margin-right: var(--t);
     place-self: start;
-    
+}
+/* received chat container */
+.sent {
+  
+        --_d: 100%;
+            border-right: var(--t) solid #ffffff00;
+            margin-left: var(--t);
+            place-self: end;
+            margin-left: auto;
+            margin-right: 0;
+            background-color: #1a354b;
 }
 
 /* Clear floats */
@@ -108,6 +126,7 @@
     color: #ffffff;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
+
 hr {
     display: block;
     height: 1px;
@@ -126,18 +145,21 @@ hr {
 
 #inputText{
     position: absolute;
-    display: block;
     height: fit-content;
-    width: 90%;
+    width: fit-content;
+    bottom: -1vh;
+    height: 3%;
+    width: 75vw;
+    font-size: 2vh;
     border: 1px solid #ffffff00;
     background-color: #102230;
-    border-radius: 10px;
-    margin: 1em 0;
-    padding: 8px;
+    border-radius: 1em;
+    margin: 2em 0;
+    padding: 0.5vh;
     font-family: system-ui,
         -apple-system,
         BlinkMacSystemFont,
-        'Segoe UI',
+        'Segoe UI',+
         Roboto,
         Oxygen,
         Ubuntu,
@@ -147,29 +169,34 @@ hr {
         sans-serif;
     color: white;
 }
-
 #sendBtn {
-    position: relative;
+    position: absolute;
     float: right;
-    display: inline-block;
-    padding: 15px 25px;
-    font-size: 24px;
+    bottom: 3vh;
+    left: 78.5vw;
+    margin-top: 1%;
+
+}
+#sendBtn button {
     cursor: pointer;
+    font-size: 4vh;
     text-align: center;
-    text-decoration: none;
     outline: none;
     color: #fff;
     background-color: #1a354b;
     border: none;
     border-radius: 15px;
     box-shadow: 0 9px #999;
+    padding: 0.2vw;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
 }
 
-#sendBtn:hover {
+#sendBtn:hover button{
     background-color: #1a354b;
 }
 
-#sendBtn:active {
+#sendBtn:active button{
     background-color: #1a354b;
     box-shadow: 0 5px #666;
     transform: translateY(4px);
