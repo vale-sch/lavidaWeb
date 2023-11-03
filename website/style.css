@@ -1,9 +1,4 @@
-body {
-    background-image: url("/wallpaper/blurred_colors.jpg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-color: #ffffff;
-}
+
 /* Chat overlay */
 #chatContainer{
     position: absolute;
