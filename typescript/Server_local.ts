@@ -1,39 +1,53 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://LaVidaAdmin:password123123@lavida.pdmcc5b.mongodb.net/?retryWrites=true&w=majority";
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
-async function run() {
+const express = require('express');
+const body = require('body-parser');
+const cors = require("cors");
+const corsOptions = {
+    origin: '*',
+    credentials: true,            //access-control-allow-credentials:true
+    optionSuccessStatus: 200,
+}
+const uri = 'mongodb+srv://LaVidaAdmin:password123123@lavida.pdmcc5b.mongodb.net/?retryWrites=true&w=majority';
+
+async function start() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        // Send a ping to confirm a successful connection
+        const client = new MongoClient(uri, {
+            serverApi: {
+                version: ServerApiVersion.v1,
+                strict: true,
+                deprecationErrors: true,
+            }
+        });
         await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
-        const database = client.db('lavida');
-        const collection = database.collection('your-collection-name');
+        const app = express();
+        app.use(cors(corsOptions)) // Use this after the variable declaration
 
 
-    } catch {
-        console.log("error");
+        await client.connect();
+        client.db("lavidaWeb").collection("users");
+        app.db = client.db("lavidaWeb");
+
+        // body parser
+        app.use(body.json({
+            limit: '500kb'
+        }));
+
+        // Routes
+
+        app.use('/login', require('./RoutesServer.ts'));
+
+        // Start server
+
+        app.listen(3000, () => {
+            console.log('Server is running on port 3000');
+        });
+
+    }
+    catch (error) {
+        console.log(error);
     }
 }
-// let user: string = document.getElementById("loginUser").innerHTML;
-// let pw: string = document.getElementById("loginPW").innerHTML;
 
-// document.getElementById("loginBtn").addEventListener("click", checkDB);
-
-// async function checkDB() {
-//     // Insert a single document into the collection using insertOne
-//     //  const documentToInsert = { name: user, age: pw };
-//     // const result = await collection.insertOne(documentToInsert);
-//     // console.log(`Inserted ${result.insertedCount} document`);
-// }
-run().catch(console.dir);
+start();

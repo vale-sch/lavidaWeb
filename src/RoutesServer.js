@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const CreateUser_1 = require("../typescript/CreateUser");
+const CheckUser_1 = require("../typescript/CheckUser");
+const express = require('express');
+const router = express.Router();
+console.log('routes running on 3000');
+router.post('/create', CreateUser_1.CreateUser);
+router.post('/check', CheckUser_1.CheckUser);
+module.exports = router;

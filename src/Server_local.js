@@ -8,39 +8,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://LaVidaAdmin:password123123@lavida.pdmcc5b.mongodb.net/?retryWrites=true&w=majority";
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-function run() {
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongodb_1 = require("mongodb");
+const express = require('express');
+const body = require('body-parser');
+const cors = require("cors");
+const corsOptions = {
+    origin: '*',
+    credentials: true,
+    optionSuccessStatus: 200,
+};
+const uri = 'mongodb+srv://LaVidaAdmin:password123123@lavida.pdmcc5b.mongodb.net/?retryWrites=true&w=majority';
+function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // Connect the client to the server	(optional starting in v4.7)
-            yield client.connect();
-            // Send a ping to confirm a successful connection
+            const client = new mongodb_1.MongoClient(uri, {
+                serverApi: {
+                    version: mongodb_1.ServerApiVersion.v1,
+                    strict: true,
+                    deprecationErrors: true,
+                }
+            });
             yield client.db("admin").command({ ping: 1 });
-            console.log("Pinged your deployment. You successfully connected to MongoDB!");
-            const database = client.db('lavida');
-            const collection = database.collection('your-collection-name');
+            const app = express();
+            app.use(cors(corsOptions)); // Use this after the variable declaration
+            yield client.connect();
+            client.db("lavidaWeb").collection("users");
+            app.db = client.db("lavidaWeb");
+            // body parser
+            app.use(body.json({
+                limit: '500kb'
+            }));
+            // Routes
+            app.use('/login', require('./RoutesServer.ts'));
+            // Start server
+            app.listen(3000, () => {
+                console.log('Server is running on port 3000');
+            });
         }
-        catch (_a) {
-            console.log("error");
+        catch (error) {
+            console.log(error);
         }
     });
 }
-// let user: string = document.getElementById("loginUser").innerHTML;
-// let pw: string = document.getElementById("loginPW").innerHTML;
-// document.getElementById("loginBtn").addEventListener("click", checkDB);
-// async function checkDB() {
-//     // Insert a single document into the collection using insertOne
-//     //  const documentToInsert = { name: user, age: pw };
-//     // const result = await collection.insertOne(documentToInsert);
-//     // console.log(`Inserted ${result.insertedCount} document`);
-// }
-run().catch(console.dir);
+start();
