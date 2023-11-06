@@ -1,11 +1,13 @@
 "use strict";
 var lavida;
 (function (lavida) {
-    class Users {
-        //private userName: string = "";
-        // private password: string = "";
+    class User {
         constructor() {
+            this.id = 0;
+            this.name = "";
+            this.password = "";
+            this.isActive = false;
         }
     }
-    lavida.Users = Users;
+    lavida.User = User;
 })(lavida || (lavida = {}));

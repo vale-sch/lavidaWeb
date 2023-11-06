@@ -8,22 +8,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckUser = void 0;
-function CheckUser(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { db } = req.app;
-            const result = yield db.collection('users').find().toArray();
-            res.status(200).json({
-                message: "Customers retrieved",
-                customers: result
-            });
-        }
-        catch (error) {
-            //@ts-ignore
-            res.status(500).json({ error: error.toString() });
-        }
-    });
-}
-exports.CheckUser = CheckUser;
+var lavida;
+(function (lavida) {
+    let users = [];
+    fetchUsers();
+    let buttonDiv = document.getElementById("loginBtn");
+    buttonDiv.addEventListener("click", checkCredentials);
+    function fetchUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield fetch('https://lavida-server.vercel.app/api/get_users');
+                users = yield response.json();
+            }
+            catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        });
+    }
+    function checkCredentials() {
+        users.forEach((user) => {
+            console.log(user.id);
+        });
+    }
+})(lavida || (lavida = {}));

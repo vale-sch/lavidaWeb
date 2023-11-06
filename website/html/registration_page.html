@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title> Responsive Registration Form | CodingLab </title>
     <link rel="stylesheet" href="/website/css/registration.css">
+    <script src="../../src/CreateUser.js" defer=""></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -19,13 +20,13 @@
                 <div class="user-details">
                     <div class="input-box">
                         <span class="details">Username</span>
-                        <input type="text" placeholder="Enter your username" required>
+                        <input id="name" type="text" placeholder="Enter your username" required>
                     </div>
 
 
                     <div class="input-box">
                         <span class="details">Password</span>
-                        <input type="text" placeholder="Enter your password" required>
+                        <input id="password" type="text" placeholder="Enter your password" required>
                     </div>
                     <!--<div class="input-box">
                         <span class="details">Confirm Password</span>
@@ -38,7 +39,7 @@
                 </div>
 
                 <div class="button">
-                    <input type="submit" value="Register">
+                    <input type="submit" value="Register" id="registration">
                 </div>
             </form>
         </div>

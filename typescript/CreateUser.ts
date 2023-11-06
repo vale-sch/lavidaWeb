@@ -1,60 +1,44 @@
+namespace lavida {
+    let buttonDiv: HTMLInputElement = document.getElementById("registration") as HTMLInputElement;
 
+    buttonDiv.addEventListener("click", registrateMe);
+    function registrateMe(): void {
 
-export async function CreateUser(req: any, res: any) {
+        let nameValue: string = (document.getElementById("name") as HTMLInputElement).value;
+        let passwordValue: string = (document.getElementById("password") as HTMLInputElement).value;
 
-    try {
-        console.log("result1");
-
-        const { db } = req.app;
-        console.log("result2");
-
-        const { name, password } = req.body;
-        console.log(req.body);
-
-        if (!name) {
-            return res.status(400).json({ message: 'Name is required' });
-        }
-        if (!password) {
-            return res.status(400).json({ message: 'Password is required' });
-        }
-        console.log("result4");
-
-        // if (!email) {
-        //     return res.status(400).json({ message: 'Email is required' });
-        // }
-
-        // if (phone && phone.length > 10) {
-        //     return res.status(400).json({ message: 'Phone number cannot be longer than 10 digits' });
-        // }
-
-        // if (address && address.length > 100) {
-        //     return res.status(400).json({ message: 'Address must be less than 100 characters' });
-        // }
-
-        // check if customer exists
-
-        // const existingCustomer = await db.collection('customers').findOne({
-        //     email: email.toLowerCase()
-        // });
-
-        // if (existingCustomer) {
-        //     return res.status(400).json({ message: 'Customer already exists' });
-        // }
-
-        const result = await db.collection('users').insertOne({
-            name,
-            password
-        });
-        console.log(db.collection('users'), result);
-        if (result.acknowledged) {
-            res.status(200).json({ message: 'Customer created' });
-        } else {
-            throw new Error('Customer not created');
-        }
+        if (!nameValue || !passwordValue) return;
+        createUser(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue);
 
     }
-    catch (error) {
-        //@ts-ignore
-        res.status(500).json({ error: error.toString() });
+
+    async function createUser(_id: number, _name: string, _password: string) {
+        let requestData = {
+            id: _id,
+            name: _name,
+            password: _password,
+            isActive: true
+        };
+
+        try {
+            let response = await fetch('https://lavida-server.vercel.app/api/create_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            });
+
+            if (response.status === 201) {
+                let data = await response.json();
+                window.location.replace("landing_page.html")
+            } else {
+                let data = await response.json();
+                console.log(`Error: ${data.error}`);
+                alert("You have been successfull registrated!")
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+        }
     }
 }
