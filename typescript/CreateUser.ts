@@ -1,7 +1,9 @@
+
 namespace lavida {
     let buttonDiv: HTMLInputElement = document.getElementById("registration") as HTMLInputElement;
-
     buttonDiv.addEventListener("click", registrateMe);
+
+
     function registrateMe(): void {
 
         let nameValue: string = (document.getElementById("name") as HTMLInputElement).value;
@@ -13,12 +15,8 @@ namespace lavida {
     }
 
     async function createUser(_id: number, _name: string, _password: string) {
-        let requestData = {
-            id: _id,
-            name: _name,
-            password: _password,
-            isActive: true
-        };
+        let newUser = new User(_id, _name, _password, true);
+
 
         try {
             let response = await fetch('https://lavida-server.vercel.app/api/create_user', {
@@ -26,19 +24,20 @@ namespace lavida {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(requestData),
+                body: JSON.stringify(newUser),
             });
-
             if (response.status === 201) {
-                let data = await response.json();
-                window.location.replace("landing_page.html")
+                await response.json();
+                window.location.replace("landing_page.html");
+                alert("You have been successfull registrated!")
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);
-                alert("You have been successfull registrated!")
             }
         } catch (error) {
             console.error('Error creating user:', error);
         }
     }
+
 }
+

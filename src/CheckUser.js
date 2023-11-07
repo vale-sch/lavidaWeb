@@ -13,7 +13,9 @@ var lavida;
     let users = [];
     fetchUsers();
     let buttonDiv = document.getElementById("loginBtn");
-    buttonDiv.addEventListener("click", checkCredentials);
+    buttonDiv.onclick = checkCredentials;
+    let userLogin = document.getElementById("loginUser");
+    let userPassword = document.getElementById("loginPW");
     function fetchUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -26,8 +28,22 @@ var lavida;
         });
     }
     function checkCredentials() {
-        users.forEach((user) => {
-            console.log(user.id);
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userLogin.value || !userPassword.value)
+                return;
+            let thisUser = new lavida.User(0, "", "", false);
+            users.forEach((userDB) => {
+                if (userLogin.value === userDB.name) {
+                    if (userPassword.value === userDB.password) {
+                        thisUser = userDB;
+                    }
+                }
+            });
+            yield new Promise(f => setTimeout(f, 100));
+            if (thisUser.id != 0) {
+                new lavida.Overview(users, thisUser);
+                window.location.replace("overview.html");
+            }
         });
     }
 })(lavida || (lavida = {}));

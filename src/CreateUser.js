@@ -21,28 +21,23 @@ var lavida;
     }
     function createUser(_id, _name, _password) {
         return __awaiter(this, void 0, void 0, function* () {
-            let requestData = {
-                id: _id,
-                name: _name,
-                password: _password,
-                isActive: true
-            };
+            let newUser = new lavida.User(_id, _name, _password, true);
             try {
                 let response = yield fetch('https://lavida-server.vercel.app/api/create_user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestData),
+                    body: JSON.stringify(newUser),
                 });
                 if (response.status === 201) {
-                    let data = yield response.json();
+                    yield response.json();
                     window.location.replace("landing_page.html");
+                    alert("You have been successfull registrated!");
                 }
                 else {
                     let data = yield response.json();
                     console.log(`Error: ${data.error}`);
-                    alert("You have been successfull registrated!");
                 }
             }
             catch (error) {
