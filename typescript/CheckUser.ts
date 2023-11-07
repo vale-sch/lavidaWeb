@@ -1,5 +1,6 @@
 namespace lavida {
     let users: User[] = [];
+
     fetchUsers();
 
     let buttonDiv: HTMLInputElement = document.getElementById("loginBtn") as HTMLInputElement;
@@ -16,7 +17,6 @@ namespace lavida {
         } catch (error) {
             console.error('Error fetching users:', error);
         }
-
     }
 
     async function checkCredentials() {
@@ -33,8 +33,7 @@ namespace lavida {
         await new Promise(f => setTimeout(f, 100));
 
         if (thisUser.id != 0) {
-            new Overview(users, thisUser);
-            window.location.replace("overview.html")
+            window.location.replace(`overview.html?user=${encodeURIComponent(userLogin.value)}`);
         }
     }
 

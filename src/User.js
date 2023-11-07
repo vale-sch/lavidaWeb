@@ -2,15 +2,18 @@
 var lavida;
 (function (lavida) {
     class User {
-        constructor(_id, _name, _password, _isActive) {
+        constructor(_id, _name, __password, _isactive) {
             this.id = 0;
             this.name = "";
-            this.password = "";
-            this.isActive = false;
+            this._password = "";
+            this.isactive = false;
             this.id = _id;
             this.name = _name;
-            this.password = _password;
-            this.isActive = _isActive;
+            this._password = __password;
+            this.isactive = _isactive;
+        }
+        get password() {
+            return this._password;
         }
     }
     lavida.User = User;

@@ -18,9 +18,11 @@ var lavida;
      rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 88%)`;
         chatsHandler.scrollTop = chatsHandler.scrollHeight;
     }
+    const params = new URLSearchParams(window.location.search);
+    const data = params.get("user");
+    document.getElementById("chatName").innerText = data;
     function sendMsg() {
         let checkWithoutLineBreaks = msgField.innerText.replace(/[\r\n]/gm, '');
-        console.log(msgField.innerText);
         if (checkWithoutLineBreaks == "")
             return;
         let msg = document.createElement("p");
@@ -33,6 +35,28 @@ var lavida;
         imgMe.src = "/avatars/1.png";
         let span = document.createElement("span");
         span.className = "time-right";
+        let dateTime = new Date();
+        span.innerHTML = dateTime.toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' });
+        sentDiv.appendChild(imgMe);
+        sentDiv.appendChild(msg);
+        sentDiv.appendChild(span);
+        chatsHandler.appendChild(sentDiv);
+        chatsHandler.scrollTop = chatsHandler.scrollHeight;
+    }
+    function receiveMsg() {
+        let checkWithoutLineBreaks = msgField.innerText.replace(/[\r\n]/gm, '');
+        if (checkWithoutLineBreaks == "")
+            return;
+        let msg = document.createElement("p");
+        msg.className = "txt";
+        msg.innerText = msgField.innerText;
+        msgField.innerText = "";
+        let sentDiv = document.createElement("div");
+        sentDiv.className = "messageDiv received";
+        let imgMe = document.createElement("img");
+        imgMe.src = "/avatars/2.png";
+        let span = document.createElement("span");
+        span.className = "time-left";
         let dateTime = new Date();
         span.innerHTML = dateTime.toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' });
         sentDiv.appendChild(imgMe);

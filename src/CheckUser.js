@@ -41,8 +41,7 @@ var lavida;
             });
             yield new Promise(f => setTimeout(f, 100));
             if (thisUser.id != 0) {
-                new lavida.Overview(users, thisUser);
-                window.location.replace("overview.html");
+                window.location.replace(`overview.html?user=${encodeURIComponent(userLogin.value)}`);
             }
         });
     }
