@@ -24,15 +24,15 @@ namespace lavida {
 
         let thisUser: User = new User(0, "", "", false);
         users.forEach((userDB: User) => {
-            if (userLogin.value === userDB.name) {
-                if (userPassword.value === userDB.password) {
+            if (userLogin.value === userDB.Name) {
+                if (userPassword.value === userDB.Password) {
                     thisUser = userDB;
                 }
             }
         });
         await new Promise(f => setTimeout(f, 100));
 
-        if (thisUser.id != 0) {
+        if (thisUser.Id != 0) {
             window.location.replace(`overview.html?user=${encodeURIComponent(userLogin.value)}`);
         }
     }

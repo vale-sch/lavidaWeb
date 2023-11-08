@@ -16,9 +16,8 @@ namespace lavida {
 
     async function createUser(_id: number, _name: string, _password: string) {
         let newUser = new User(_id, _name, _password, true);
-
-
         try {
+
             let response = await fetch('https://lavida-server.vercel.app/api/create_user', {
                 method: 'POST',
                 headers: {
@@ -38,6 +37,75 @@ namespace lavida {
             console.error('Error creating user:', error);
         }
     }
+    //sendMsg("joacchim", "quatsch laber nicht 1", new Date().toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' }));
+    async function sendMsg(chatID: string, message: string, time: string) {
+        let msg: Message = new Message(chatID, message, time);
+        try {
+
+            let response = await fetch('https://addmessage-mfccjlsnga-uc.a.run.app', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(msg),
+            });
+
+            if (response.status === 201) {
+                let responseFirebase: string = await response.text() as string;
+                console.log(responseFirebase);
+                //  window.location.replace("landing_page.html");
+                //alert("You have been successfull registrated!")
+            } else {
+                let data = await response.json();
+                console.log(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    deleteChat("joacchim");
+    async function deleteChat(_chatID: string) {
+        try {
+            const chatID: any = {
+                chatID: _chatID
+            };
+            let response = await fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(chatID),
+            });
+
+            if (response.status === 201) {
+                let responseFirebase: string = await response.text() as string;
+                console.log(responseFirebase);
+                //  window.location.replace("landing_page.html");
+                //alert("You have been successfull registrated!")
+            } else {
+                let data = await response.json();
+                console.log(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function fetchChatEvery100ms(chatID: string) {
+        setInterval(async () => {
+            try {
+                const response = await fetch(`https://receivechat-mfccjlsnga-uc.a.run.app?chatID=${chatID}`);
+                let chat = await response.json();
+                console.log(chat);
+            } catch (error) {
+                console.error('Error fetching chat:', error);
+            }
+        }, 100); // 100 milliseconds
+    }
+
+    // Call the function to start fetching data every 100ms
+    //fetchChatEvery100ms("joachim");
+
 
 }
 

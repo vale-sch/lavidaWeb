@@ -1,17 +1,24 @@
 namespace lavida {
     export class User {
-        public id: number = 0;
-        public name: string = "";
-        private _password: string = "";
+        private id: number = 0;
+        private name: string = "";
+        private password: string = "";
         public isactive: boolean = false;
         constructor(_id: number, _name: string, __password: string, _isactive: boolean) {
             this.id = _id;
             this.name = _name;
-            this._password = __password;
+            this.password = __password;
             this.isactive = _isactive;
         }
-        public get password(): string {
-            return this._password;
+        public get Id(): number {
+            return this.id;
         }
+        public get Name(): string {
+            return this.name;
+        }
+        public get Password(): string {
+            return this.password;
+        }
+
     }
 }

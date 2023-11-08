@@ -45,4 +45,78 @@ var lavida;
             }
         });
     }
+    //sendMsg("joacchim", "quatsch laber nicht 1", new Date().toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' }));
+    function sendMsg(chatID, message, time) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let msg = new Message(chatID, message, time);
+            try {
+                let response = yield fetch('https://addmessage-mfccjlsnga-uc.a.run.app', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(msg),
+                });
+                if (response.status === 201) {
+                    let responseFirebase = yield response.text();
+                    console.log(responseFirebase);
+                    //  window.location.replace("landing_page.html");
+                    //alert("You have been successfull registrated!")
+                }
+                else {
+                    let data = yield response.json();
+                    console.log(`Error: ${data.error}`);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        });
+    }
+    deleteChat("joacchim");
+    function deleteChat(_chatID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const chatID = {
+                    chatID: _chatID
+                };
+                let response = yield fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(chatID),
+                });
+                if (response.status === 201) {
+                    let responseFirebase = yield response.text();
+                    console.log(responseFirebase);
+                    //  window.location.replace("landing_page.html");
+                    //alert("You have been successfull registrated!")
+                }
+                else {
+                    let data = yield response.json();
+                    console.log(`Error: ${data.error}`);
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        });
+    }
+    function fetchChatEvery100ms(chatID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    const response = yield fetch(`https://receivechat-mfccjlsnga-uc.a.run.app?chatID=${chatID}`);
+                    let chat = yield response.json();
+                    console.log(chat);
+                }
+                catch (error) {
+                    console.error('Error fetching chat:', error);
+                }
+            }), 100); // 100 milliseconds
+        });
+    }
+    // Call the function to start fetching data every 100ms
+    //fetchChatEvery100ms("joachim");
 })(lavida || (lavida = {}));

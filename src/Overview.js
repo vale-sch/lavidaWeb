@@ -40,8 +40,8 @@ var lavida;
                 const response = yield fetch('https://lavida-server.vercel.app/api/get_users');
                 users = yield response.json();
                 users.forEach(user => {
-                    if (user.isactive && data != user.name)
-                        draw(user.name);
+                    if (user.isactive && data != user.Name)
+                        draw(user.Name);
                 });
             }
             catch (error) {

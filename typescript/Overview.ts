@@ -34,8 +34,8 @@ namespace lavida {
             const response = await fetch('https://lavida-server.vercel.app/api/get_users');
             users = await response.json();
             users.forEach(user => {
-                if (user.isactive && data != user.name)
-                    draw(user.name);
+                if (user.isactive && data != user.Name)
+                    draw(user.Name);
             });
         } catch (error) {
             console.error('Error fetching users:', error);
