@@ -37,12 +37,12 @@ namespace lavida {
             console.error('Error creating user:', error);
         }
     }
-    //sendMsg("joacchim", "quatsch laber nicht 1", new Date().toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' }));
-    async function sendMsg(chatID: string, message: string, time: string) {
-        let msg: Message = new Message(chatID, message, time);
+    sendMsg("joacchim", "joachim", "quatsch laber nicht 1");
+    async function sendMsg(chatID: string, senderID: string, message: string) {
+        let msg: Message = new Message(chatID, senderID, message);
         try {
 
-            let response = await fetch('https://addmessage-mfccjlsnga-uc.a.run.app', {
+            let response = await fetch('https://lavida-server.vercel.app/api/send_msg', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +63,8 @@ namespace lavida {
             console.log(error);
         }
     }
-    deleteChat("joacchim");
+
+    // deleteChat("joacchim");
     async function deleteChat(_chatID: string) {
         try {
             const chatID: any = {

@@ -45,12 +45,12 @@ var lavida;
             }
         });
     }
-    //sendMsg("joacchim", "quatsch laber nicht 1", new Date().toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' }));
-    function sendMsg(chatID, message, time) {
+    sendMsg("joacchim", "joachim", "quatsch laber nicht 1");
+    function sendMsg(chatID, senderID, message) {
         return __awaiter(this, void 0, void 0, function* () {
-            let msg = new Message(chatID, message, time);
+            let msg = new Message(chatID, senderID, message);
             try {
-                let response = yield fetch('https://addmessage-mfccjlsnga-uc.a.run.app', {
+                let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ var lavida;
             }
         });
     }
-    deleteChat("joacchim");
+    // deleteChat("joacchim");
     function deleteChat(_chatID) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
