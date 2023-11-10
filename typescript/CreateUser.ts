@@ -37,7 +37,7 @@ namespace lavida {
             console.error('Error creating user:', error);
         }
     }
-    sendMsg("joacchim", "joachim", "quatsch laber nicht 1");
+    //sendMsg("peter", "joachim", "quatsch laber nicht 1");
     async function sendMsg(chatID: string, senderID: string, message: string) {
         let msg: Message = new Message(chatID, senderID, message);
         try {
@@ -92,20 +92,31 @@ namespace lavida {
         }
     }
 
-    async function fetchChatEvery100ms(chatID: string) {
-        setInterval(async () => {
-            try {
-                const response = await fetch(`https://receivechat-mfccjlsnga-uc.a.run.app?chatID=${chatID}`);
-                let chat = await response.json();
-                console.log(chat);
-            } catch (error) {
-                console.error('Error fetching chat:', error);
+    async function getChatMessages(chatID: string): Promise<void> {
+        try {
+            const response = await fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${chatID}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const messages: Message[] = await response.json();
+                console.log('Chat Messages:', messages);
+                // Process the messages as needed
+            } else {
+                const data = await response.json();
+                console.log(`Error: ${data.error}`);
             }
-        }, 100); // 100 milliseconds
+        } catch (error) {
+            console.error(error);
+        }
     }
 
-    // Call the function to start fetching data every 100ms
-    //fetchChatEvery100ms("joachim");
+    // Example usage
+    getChatMessages('joacchim');
+
 
 
 }

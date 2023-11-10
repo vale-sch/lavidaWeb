@@ -45,7 +45,7 @@ var lavida;
             }
         });
     }
-    sendMsg("joacchim", "joachim", "quatsch laber nicht 1");
+    //sendMsg("peter", "joachim", "quatsch laber nicht 1");
     function sendMsg(chatID, senderID, message) {
         return __awaiter(this, void 0, void 0, function* () {
             let msg = new Message(chatID, senderID, message);
@@ -103,20 +103,30 @@ var lavida;
             }
         });
     }
-    function fetchChatEvery100ms(chatID) {
+    function getChatMessages(chatID) {
         return __awaiter(this, void 0, void 0, function* () {
-            setInterval(() => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    const response = yield fetch(`https://receivechat-mfccjlsnga-uc.a.run.app?chatID=${chatID}`);
-                    let chat = yield response.json();
-                    console.log(chat);
+            try {
+                const response = yield fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${chatID}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.status === 200) {
+                    const messages = yield response.json();
+                    console.log('Chat Messages:', messages);
+                    // Process the messages as needed
                 }
-                catch (error) {
-                    console.error('Error fetching chat:', error);
+                else {
+                    const data = yield response.json();
+                    console.log(`Error: ${data.error}`);
                 }
-            }), 100); // 100 milliseconds
+            }
+            catch (error) {
+                console.error(error);
+            }
         });
     }
-    // Call the function to start fetching data every 100ms
-    //fetchChatEvery100ms("joachim");
+    // Example usage
+    getChatMessages('joacchim');
 })(lavida || (lavida = {}));
