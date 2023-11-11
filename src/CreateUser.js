@@ -45,7 +45,7 @@ var lavida;
             }
         });
     }
-    //sendMsg("peter", "joachim", "quatsch laber nicht 1");
+    sendMsg("bexii", "joachim", "ich mag brezeln");
     function sendMsg(chatID, senderID, message) {
         return __awaiter(this, void 0, void 0, function* () {
             let msg = new Message(chatID, senderID, message);
@@ -58,8 +58,8 @@ var lavida;
                     body: JSON.stringify(msg),
                 });
                 if (response.status === 201) {
-                    let responseFirebase = yield response.text();
-                    console.log(responseFirebase);
+                    let rspTxt = yield response.text();
+                    console.log(rspTxt);
                     //  window.location.replace("landing_page.html");
                     //alert("You have been successfull registrated!")
                 }
@@ -128,5 +128,5 @@ var lavida;
         });
     }
     // Example usage
-    getChatMessages('joacchim');
+    getChatMessages('peter');
 })(lavida || (lavida = {}));

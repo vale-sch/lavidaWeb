@@ -37,7 +37,7 @@ namespace lavida {
             console.error('Error creating user:', error);
         }
     }
-    //sendMsg("peter", "joachim", "quatsch laber nicht 1");
+    sendMsg("bexii", "joachim", "ich mag brezeln");
     async function sendMsg(chatID: string, senderID: string, message: string) {
         let msg: Message = new Message(chatID, senderID, message);
         try {
@@ -51,8 +51,8 @@ namespace lavida {
             });
 
             if (response.status === 201) {
-                let responseFirebase: string = await response.text() as string;
-                console.log(responseFirebase);
+                let rspTxt: string = await response.text() as string;
+                console.log(rspTxt);
                 //  window.location.replace("landing_page.html");
                 //alert("You have been successfull registrated!")
             } else {
@@ -115,7 +115,7 @@ namespace lavida {
     }
 
     // Example usage
-    getChatMessages('joacchim');
+    getChatMessages('peter');
 
 
 
