@@ -115,7 +115,8 @@ namespace lavida {
     }
     async function createChat(chatID: string, circle: Circle) {
         console.log(chatID);
-        let chat: Message = new Message(chatID, circle.chatName, "");
+        let newMsgArray: Message[] = [];
+        let chat: Chat = new Chat(chatID, newMsgArray);
 
 
         try {

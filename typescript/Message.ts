@@ -1,8 +1,7 @@
 class Message {
-    public chatID: string = "";
-    public senderID: string = "";
-
-    public message: string = "";
+    public chatID: string;
+    public senderID: string;
+    public message: string;
     public time: string = "";
 
     constructor(_chatID: string, _senderID: string, _message: string) {

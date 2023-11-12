@@ -14,6 +14,7 @@ var lavida;
     const chatPartnerName = params.get("user");
     const chatID = params.get("chatID");
     const meUsername = params.get("me");
+    let msgHistory = new Array();
     window.addEventListener("load", changeGradient);
     document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("click", (e) => {
         let checkWithoutLineBreaks = msgField.innerText.replace(/[\r\n]/gm, '');
@@ -112,35 +113,31 @@ var lavida;
         });
     }
     // deleteChat("joacchim");
-    function deleteChat(_chatID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const chatID = {
-                    chatID: _chatID
-                };
-                let response = yield fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(chatID),
-                });
-                if (response.status === 201) {
-                    let responseFirebase = yield response.text();
-                    console.log(responseFirebase);
-                    //  window.location.replace("landing_page.html");
-                    //alert("You have been successfull registrated!")
-                }
-                else {
-                    let data = yield response.json();
-                    console.log(`Error: ${data.error}`);
-                }
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-    }
+    // async function deleteChat(_chatID: string) {
+    //     try {
+    //         const chatID: any = {
+    //             chatID: _chatID
+    //         };
+    //         let response = await fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(chatID),
+    //         });
+    //         if (response.status === 201) {
+    //             let responseFirebase: string = await response.text() as string;
+    //             console.log(responseFirebase);
+    //             //  window.location.replace("landing_page.html");
+    //             //alert("You have been successfull registrated!")
+    //         } else {
+    //             let data = await response.json();
+    //             console.log(`Error: ${data.error}`);
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
     function getChatMessages(chatID) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -152,10 +149,13 @@ var lavida;
                 });
                 if (response.status === 200) {
                     const messagesResponse = yield response.json();
-                    messagesResponse.forEach((msg) => {
-                        msg.messages.forEach((msgInner) => {
-                            handleReceiveMsg(msgInner.sender_id, msgInner.message, msgInner.time_sent);
-                        });
+                    let messagesArray = messagesResponse[0].messages;
+                    console.log(messagesArray);
+                    messagesArray.forEach((msg) => {
+                        if (!msgHistory.includes(msg)) {
+                            msgHistory.push(msg);
+                            handleReceiveMsg(msg.senderID, msg.message, msg.time);
+                        }
                     });
                     // Process the messages as needed
                 }

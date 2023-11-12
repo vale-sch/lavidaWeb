@@ -106,7 +106,8 @@ var lavida;
     function createChat(chatID, circle) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(chatID);
-            let chat = new Message(chatID, circle.chatName, "");
+            let newMsgArray = [];
+            let chat = new Chat(chatID, newMsgArray);
             try {
                 let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
                     method: 'POST',

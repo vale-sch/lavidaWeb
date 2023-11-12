@@ -3,6 +3,7 @@ namespace lavida {
     const chatPartnerName = params.get("user") as string;
     const chatID = params.get("chatID") as string;
     const meUsername = params.get("me") as string;
+    let msgHistory: Array<Message> = new Array<Message>();
 
     window.addEventListener("load", changeGradient);
 
@@ -130,32 +131,32 @@ namespace lavida {
     }
 
     // deleteChat("joacchim");
-    async function deleteChat(_chatID: string) {
-        try {
-            const chatID: any = {
-                chatID: _chatID
-            };
-            let response = await fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(chatID),
-            });
+    // async function deleteChat(_chatID: string) {
+    //     try {
+    //         const chatID: any = {
+    //             chatID: _chatID
+    //         };
+    //         let response = await fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(chatID),
+    //         });
 
-            if (response.status === 201) {
-                let responseFirebase: string = await response.text() as string;
-                console.log(responseFirebase);
-                //  window.location.replace("landing_page.html");
-                //alert("You have been successfull registrated!")
-            } else {
-                let data = await response.json();
-                console.log(`Error: ${data.error}`);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    //         if (response.status === 201) {
+    //             let responseFirebase: string = await response.text() as string;
+    //             console.log(responseFirebase);
+    //             //  window.location.replace("landing_page.html");
+    //             //alert("You have been successfull registrated!")
+    //         } else {
+    //             let data = await response.json();
+    //             console.log(`Error: ${data.error}`);
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
     async function getChatMessages(chatID: string): Promise<void> {
         try {
@@ -165,15 +166,16 @@ namespace lavida {
                     'Content-Type': 'application/json',
                 },
             });
-
             if (response.status === 200) {
                 const messagesResponse: any = await response.json();
+                let messagesArray: Message[] = messagesResponse[0].messages;
+                console.log(messagesArray);
+                messagesArray.forEach((msg: Message) => {
+                    if (!msgHistory.includes(msg)) {
+                        msgHistory.push(msg)
+                        handleReceiveMsg(msg.senderID, msg.message, msg.time);
+                    }
 
-                messagesResponse.forEach((msg: any) => {
-                    msg.messages.forEach((msgInner: any) => {
-                        handleReceiveMsg(msgInner.sender_id, msgInner.message, msgInner.time_sent);
-
-                    });
                 });
                 // Process the messages as needed
             } else {
