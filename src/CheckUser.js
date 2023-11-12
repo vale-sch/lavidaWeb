@@ -10,17 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var lavida;
 (function (lavida) {
-    let users = [];
-    fetchUsers();
+    let usersDB = [];
     let buttonDiv = document.getElementById("loginBtn");
     buttonDiv.onclick = checkCredentials;
     let userLogin = document.getElementById("loginUser");
     let userPassword = document.getElementById("loginPW");
+    fetchUsers();
     function fetchUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield fetch('https://lavida-server.vercel.app/api/get_users');
-                users = yield response.json();
+                let usersFetched = yield response.json();
+                let increment = 0;
+                usersFetched.forEach((userDB) => {
+                    usersDB[increment] = new lavida.User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+                    increment++;
+                });
+                usersFetched = null;
             }
             catch (error) {
                 console.error('Error fetching users:', error);
@@ -32,9 +38,10 @@ var lavida;
             if (!userLogin.value || !userPassword.value)
                 return;
             let thisUser = new lavida.User(0, "", "", false);
-            users.forEach((userDB) => {
-                if (userLogin.value === userDB.Name) {
-                    if (userPassword.value === userDB.Password) {
+            usersDB.forEach((userDB) => {
+                if (userLogin.value == userDB.Name) {
+                    console.log(userDB.Name);
+                    if (userPassword.value == userDB.Password) {
                         thisUser = userDB;
                     }
                 }

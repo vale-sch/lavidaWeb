@@ -23,6 +23,7 @@ var lavida;
         return __awaiter(this, void 0, void 0, function* () {
             let newUser = new lavida.User(_id, _name, _password, true);
             try {
+                console.log("bin ich hier");
                 let response = yield fetch('https://lavida-server.vercel.app/api/create_user', {
                     method: 'POST',
                     headers: {
@@ -45,88 +46,4 @@ var lavida;
             }
         });
     }
-    sendMsg("bexii", "joachim", "ich mag brezeln");
-    function sendMsg(chatID, senderID, message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let msg = new Message(chatID, senderID, message);
-            try {
-                let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(msg),
-                });
-                if (response.status === 201) {
-                    let rspTxt = yield response.text();
-                    console.log(rspTxt);
-                    //  window.location.replace("landing_page.html");
-                    //alert("You have been successfull registrated!")
-                }
-                else {
-                    let data = yield response.json();
-                    console.log(`Error: ${data.error}`);
-                }
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-    }
-    // deleteChat("joacchim");
-    function deleteChat(_chatID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const chatID = {
-                    chatID: _chatID
-                };
-                let response = yield fetch('https://deletechat-mfccjlsnga-uc.a.run.app', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(chatID),
-                });
-                if (response.status === 201) {
-                    let responseFirebase = yield response.text();
-                    console.log(responseFirebase);
-                    //  window.location.replace("landing_page.html");
-                    //alert("You have been successfull registrated!")
-                }
-                else {
-                    let data = yield response.json();
-                    console.log(`Error: ${data.error}`);
-                }
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-    }
-    function getChatMessages(chatID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const response = yield fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${chatID}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (response.status === 200) {
-                    const messages = yield response.json();
-                    console.log('Chat Messages:', messages);
-                    // Process the messages as needed
-                }
-                else {
-                    const data = yield response.json();
-                    console.log(`Error: ${data.error}`);
-                }
-            }
-            catch (error) {
-                console.error(error);
-            }
-        });
-    }
-    // Example usage
-    getChatMessages('peter');
 })(lavida || (lavida = {}));

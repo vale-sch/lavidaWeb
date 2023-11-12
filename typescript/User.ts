@@ -4,10 +4,10 @@ namespace lavida {
         private name: string = "";
         private password: string = "";
         public isactive: boolean = false;
-        constructor(_id: number, _name: string, __password: string, _isactive: boolean) {
+        constructor(_id: number, _name: string, _password: string, _isactive: boolean) {
             this.id = _id;
             this.name = _name;
-            this.password = __password;
+            this.password = _password;
             this.isactive = _isactive;
         }
         public get Id(): number {

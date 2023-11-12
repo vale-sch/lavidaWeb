@@ -4,11 +4,13 @@ namespace lavida {
         public y: number = 0;
         public radius: number = 0;
         public href: string = "";
-        constructor(_x: number = 0, _y: number = 0, _radius: number = 0, _href: string = "") {
+        public chatName: string = "";
+        constructor(_x: number = 0, _y: number = 0, _radius: number = 0, _href: string = "", _chatName: string) {
             this.x = _x;
             this.y = _y;
             this.radius = _radius;
             this.href = _href;
+            this.chatName = _chatName;
         }
 
     }
@@ -22,27 +24,32 @@ namespace lavida {
     }
 
 
-    let users: User[] = [];
+    let usersDB: User[] = [];
     let canvas: HTMLCanvasElement = document.getElementById('canvas') as HTMLCanvasElement;
     canvas.width = window.innerWidth * 0.95;
     canvas.height = window.innerHeight * 0.95;
     const params = new URLSearchParams(window.location.search);
-    const data = params.get("user");
+    const meUsername = params.get("user");
+
+
     async function fetchUsers(): Promise<void> {
         try {
-
             const response = await fetch('https://lavida-server.vercel.app/api/get_users');
-            users = await response.json();
-            users.forEach(user => {
-                if (user.isactive && data != user.Name)
-                    draw(user.Name);
+            let usersFetched = await response.json();
+            let increment: number = 0;
+            usersFetched.forEach((userDB: any) => {
+                usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+                increment++;
+            });
+            usersFetched = null;
+            usersDB.forEach((user: any) => {
+                if (user.isactive && meUsername != user.name)
+                    draw(user.name);
             });
         } catch (error) {
             console.error('Error fetching users:', error);
         }
     }
-
-
 
 
     let circles: Circle[] = [];
@@ -58,7 +65,7 @@ namespace lavida {
             console.log();
             do {
                 circle = new Circle(getRandomNumber(80, window.innerWidth * 0.75), getRandomNumber(80, window.innerHeight * 0.75),
-                    ((window.innerWidth * window.innerHeight) * 0.00033) / users.length, `chat_page.html?user=${username}`);
+                    ((window.innerWidth * window.innerHeight) * 0.00033) / usersDB.length, `chat_page.html?user=${username}`, username);
             } while (previousCircle && isOverlapping(circle));
 
             circles.push(circle);
@@ -95,20 +102,49 @@ namespace lavida {
                 const clickY = event.clientY - canvasBounds.top;
 
                 // Check if the click is inside any of the circles
-                for (const circle of circles) {
-                    const distance = Math.hypot(clickX - circle.x, clickY - circle.y);
-                    if (distance <= circle.radius) {
-                        window.location.href = circle.href;
-                    }
+
+                const distance = Math.hypot(clickX - circle.x, clickY - circle.y);
+                if (distance <= circle.radius) {
+                    let chatID: string = Math.floor((Date.now() + Math.random())).toString();
+                    createChat(chatID, circle);
+
                 }
+
             });
+        }
+    }
+    async function createChat(chatID: string, circle: Circle) {
+        console.log(chatID);
+        let chat: Message = new Message(chatID, circle.chatName, "");
+
+
+        try {
+
+            let response = await fetch('https://lavida-server.vercel.app/api/send_msg', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(chat),
+            });
+
+            if (response.status === 201) {
+                let rspTxt: string = await response.text() as string;
+                console.log(rspTxt);
+                window.location.href = circle.href + `&chatID=${chatID}` + `&me=${meUsername}`;
+            } else {
+                let data = await response.json();
+                console.log(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
 
     function isOverlapping(circle: Circle): boolean {
         for (const prevCircle of circles) {
             let distance = Math.hypot(circle.x - prevCircle.x, circle.y - prevCircle.y);
-            if (distance < (circle.radius + window.innerWidth * 0.75 / users.length)) {
+            if (distance < (circle.radius + window.innerWidth * 0.75 / usersDB.length)) {
                 return true;
             }
         }

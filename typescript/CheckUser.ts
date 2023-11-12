@@ -1,7 +1,6 @@
 namespace lavida {
-    let users: User[] = [];
+    let usersDB: User[] = [];
 
-    fetchUsers();
 
     let buttonDiv: HTMLInputElement = document.getElementById("loginBtn") as HTMLInputElement;
     buttonDiv.onclick = checkCredentials;
@@ -9,11 +8,18 @@ namespace lavida {
 
     let userLogin: HTMLInputElement = document.getElementById("loginUser") as HTMLInputElement;
     let userPassword: HTMLInputElement = document.getElementById("loginPW") as HTMLInputElement;
+    fetchUsers();
 
     async function fetchUsers(): Promise<void> {
         try {
             const response = await fetch('https://lavida-server.vercel.app/api/get_users');
-            users = await response.json();
+            let usersFetched = await response.json();
+            let increment: number = 0;
+            usersFetched.forEach((userDB: any) => {
+                usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+                increment++;
+            });
+            usersFetched = null;
         } catch (error) {
             console.error('Error fetching users:', error);
         }
@@ -23,9 +29,10 @@ namespace lavida {
         if (!userLogin.value || !userPassword.value) return;
 
         let thisUser: User = new User(0, "", "", false);
-        users.forEach((userDB: User) => {
-            if (userLogin.value === userDB.Name) {
-                if (userPassword.value === userDB.Password) {
+        usersDB.forEach((userDB: User) => {
+            if (userLogin.value == userDB.Name) {
+                console.log(userDB.Name);
+                if (userPassword.value == userDB.Password) {
                     thisUser = userDB;
                 }
             }
