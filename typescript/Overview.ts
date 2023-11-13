@@ -29,7 +29,7 @@ namespace lavida {
     canvas.width = window.innerWidth * 0.95;
     canvas.height = window.innerHeight * 0.95;
     const params = new URLSearchParams(window.location.search);
-    const meUsername = params.get("user");
+    let meUsername = params.get("user") as string;
 
 
     async function fetchUsers(): Promise<void> {
@@ -114,14 +114,9 @@ namespace lavida {
         }
     }
     async function createChat(chatID: string, circle: Circle) {
-        console.log(chatID);
-        let newMsgArray: Message[] = [];
-        let chat: Chat = new Chat(chatID, newMsgArray);
-
-
+        let chat: ChatHistory = ChatHistory.createNew(chatID, meUsername);
         try {
-
-            let response = await fetch('https://lavida-server.vercel.app/api/send_msg', {
+            let response = await fetch('https://lavida-server.vercel.app/api/create_chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -11,10 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var lavida;
 (function (lavida) {
     const params = new URLSearchParams(window.location.search);
-    const chatPartnerName = params.get("user");
-    const chatID = params.get("chatID");
-    const meUsername = params.get("me");
-    let msgHistory = new Array();
+    let chatPartnerName = params.get("user");
+    let chatID = params.get("chatID");
+    let meUsername = params.get("me");
+    let chatHistory;
+    let oldChatHistory = lavida.ChatHistory.createNew(chatID, meUsername);
     window.addEventListener("load", changeGradient);
     document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("click", (e) => {
         let checkWithoutLineBreaks = msgField.innerText.replace(/[\r\n]/gm, '');
@@ -65,7 +66,6 @@ var lavida;
         // if (checkWithoutLineBreaks == "") return;
         if (chatPartnerName == senderID)
             console.log("mymessage");
-        console.log(message);
         let msg = document.createElement("p");
         msg.className = "txt";
         msg.innerText = message;
@@ -86,19 +86,18 @@ var lavida;
     //sendMsg("asdasd", "joachim", "ich mag brezeln");
     function sendMsg(chatID, senderID, message) {
         return __awaiter(this, void 0, void 0, function* () {
-            let msg = new Message(chatID, senderID, message);
+            chatHistory.addMessage(senderID, message);
             try {
                 let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(msg),
+                    body: JSON.stringify(chatHistory),
                 });
                 if (response.status === 201) {
-                    let rspTxt = yield response.text();
-                    console.log(rspTxt);
-                    getChatMessages(chatID);
+                    //let rspTxt: string = await response.text() as string;
+                    getChatHistory(chatID);
                     //  window.location.replace("landing_page.html");
                     //alert("You have been successfull registrated!")
                 }
@@ -138,7 +137,7 @@ var lavida;
     //         console.log(error);
     //     }
     // }
-    function getChatMessages(chatID) {
+    function getChatHistory(chatID) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${chatID}`, {
@@ -148,15 +147,12 @@ var lavida;
                     },
                 });
                 if (response.status === 200) {
-                    const messagesResponse = yield response.json();
-                    let messagesArray = messagesResponse[0].messages;
-                    console.log(messagesArray);
-                    messagesArray.forEach((msg) => {
-                        if (!msgHistory.includes(msg)) {
-                            msgHistory.push(msg);
-                            handleReceiveMsg(msg.senderID, msg.message, msg.time);
-                        }
-                    });
+                    chatHistory = lavida.ChatHistory.fromDatabase(yield response.json());
+                    while (oldChatHistory.messages.length < chatHistory.messages.length) {
+                        let newMsg = chatHistory.messages[oldChatHistory.messages.length];
+                        oldChatHistory.messages.push(newMsg);
+                        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+                    }
                     // Process the messages as needed
                 }
                 else {
@@ -170,5 +166,5 @@ var lavida;
         });
     }
     // Example usage
-    getChatMessages(chatID);
+    getChatHistory(chatID);
 })(lavida || (lavida = {}));

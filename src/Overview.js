@@ -35,7 +35,7 @@ var lavida;
     canvas.width = window.innerWidth * 0.95;
     canvas.height = window.innerHeight * 0.95;
     const params = new URLSearchParams(window.location.search);
-    const meUsername = params.get("user");
+    let meUsername = params.get("user");
     function fetchUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -105,11 +105,9 @@ var lavida;
     }
     function createChat(chatID, circle) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(chatID);
-            let newMsgArray = [];
-            let chat = new Chat(chatID, newMsgArray);
+            let chat = lavida.ChatHistory.createNew(chatID, meUsername);
             try {
-                let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
+                let response = yield fetch('https://lavida-server.vercel.app/api/create_chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

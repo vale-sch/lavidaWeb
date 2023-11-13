@@ -1,10 +1,10 @@
 namespace lavida {
     const params = new URLSearchParams(window.location.search);
-    const chatPartnerName = params.get("user") as string;
-    const chatID = params.get("chatID") as string;
-    const meUsername = params.get("me") as string;
-    let msgHistory: Array<Message> = new Array<Message>();
-
+    let chatPartnerName = params.get("user") as string;
+    let chatID = params.get("chatID") as string;
+    let meUsername = params.get("me") as string;
+    let chatHistory: ChatHistory;
+    let oldChatHistory: ChatHistory = ChatHistory.createNew(chatID, meUsername);
     window.addEventListener("load", changeGradient);
 
     document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("click", (e) => {
@@ -78,7 +78,6 @@ namespace lavida {
         // if (checkWithoutLineBreaks == "") return;
         if (chatPartnerName == senderID)
             console.log("mymessage");
-        console.log(message);
         let msg: HTMLParagraphElement = document.createElement("p");
         msg.className = "txt"
         msg.innerText = message;
@@ -91,7 +90,7 @@ namespace lavida {
         imgMe.src = "/avatars/2.png";
 
         let span: HTMLSpanElement = document.createElement("span");
-        span.className = "time-left"
+        span.className = "time-left";
         span.innerHTML = timeSent;
         sentDiv.appendChild(imgMe);
         sentDiv.appendChild(msg);
@@ -104,7 +103,7 @@ namespace lavida {
     }
     //sendMsg("asdasd", "joachim", "ich mag brezeln");
     async function sendMsg(chatID: string, senderID: string, message: string) {
-        let msg: Message = new Message(chatID, senderID, message);
+        chatHistory.addMessage(senderID, message)
         try {
 
             let response = await fetch('https://lavida-server.vercel.app/api/send_msg', {
@@ -112,13 +111,12 @@ namespace lavida {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(msg),
+                body: JSON.stringify(chatHistory),
             });
 
             if (response.status === 201) {
-                let rspTxt: string = await response.text() as string;
-                console.log(rspTxt);
-                getChatMessages(chatID)
+                //let rspTxt: string = await response.text() as string;
+                getChatHistory(chatID);
                 //  window.location.replace("landing_page.html");
                 //alert("You have been successfull registrated!")
             } else {
@@ -158,7 +156,7 @@ namespace lavida {
     //     }
     // }
 
-    async function getChatMessages(chatID: string): Promise<void> {
+    async function getChatHistory(chatID: string): Promise<void> {
         try {
             const response = await fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${chatID}`, {
                 method: 'GET',
@@ -167,16 +165,13 @@ namespace lavida {
                 },
             });
             if (response.status === 200) {
-                const messagesResponse: any = await response.json();
-                let messagesArray: Message[] = messagesResponse[0].messages;
-                console.log(messagesArray);
-                messagesArray.forEach((msg: Message) => {
-                    if (!msgHistory.includes(msg)) {
-                        msgHistory.push(msg)
-                        handleReceiveMsg(msg.senderID, msg.message, msg.time);
-                    }
+                chatHistory = ChatHistory.fromDatabase(await response.json());
+                while (oldChatHistory.messages.length < chatHistory.messages.length) {
+                    let newMsg: Message = chatHistory.messages[oldChatHistory.messages.length];
+                    oldChatHistory.messages.push(newMsg);
+                    handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
 
-                });
+                }
                 // Process the messages as needed
             } else {
                 const data = await response.json();
@@ -188,6 +183,7 @@ namespace lavida {
     }
 
     // Example usage
-    getChatMessages(chatID);
+    getChatHistory(chatID);
+
 }
 

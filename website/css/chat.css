@@ -11,7 +11,7 @@
     border-radius: 15px;
     padding: 2% 2% 2% 2%;
     width: fit-content;
-    max-width: 80vw;
+    width: 80vw;
     height: 90vh ;
 }
 #chatsHandler{
@@ -48,6 +48,7 @@
     border-radius: 15px;
     width: fit-content;
     block-size: fit-content;
+    min-width: 35%;
     max-width: 65%;
     --r: 25px;
     /* the radius */
