@@ -107,7 +107,7 @@ var lavida;
                 }
             });
         }
-        createChat(circle, _meUsername) {
+        createChat(_userCard, _meUsername) {
             return __awaiter(this, void 0, void 0, function* () {
                 try {
                     let response = yield fetch('https://lavida-server.vercel.app/api/create_chat', {
@@ -120,7 +120,7 @@ var lavida;
                     if (response.status === 201) {
                         let rspTxt = yield response.text();
                         console.log(rspTxt);
-                        window.location.href = circle.href + `&chatID=${this.chat_id}` + `&me=${_meUsername}`;
+                        window.location.href = _userCard.href + `&chatID=${this.chat_id}` + `&me=${_meUsername}`;
                     }
                     else {
                         let data = yield response.json();

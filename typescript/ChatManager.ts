@@ -8,13 +8,13 @@ namespace lavida {
     let msgField: HTMLInputElement = <HTMLInputElement>document.getElementById("inputText");
     let chatsHandler: HTMLDivElement = <HTMLDivElement>document.getElementById("chatsHandler");
 
-    window.addEventListener("load", changeGradient);
-    function changeGradient(): void {
-        document.body.style.background = `radial-gradient(circle, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 23%,
-     rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 51%,
-     rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 88%)`;
-        chatsHandler.scrollTop = chatsHandler.scrollHeight;
-    }
+    // window.addEventListener("load", changeGradient);
+    // function changeGradient(): void {
+    //     document.body.style.background = `radial-gradient(circle, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 23%,
+    //  rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 51%,
+    //  rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 88%)`;
+    //     chatsHandler.scrollTop = chatsHandler.scrollHeight;
+    // }
 
     let chatHistory: ChatHistory = ChatHistory.createNew(chatID, meUsername);
     let oldChatHistory: ChatHistory = ChatHistory.createNew(chatID, meUsername);

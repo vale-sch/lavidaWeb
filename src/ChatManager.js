@@ -17,13 +17,13 @@ var lavida;
     document.getElementById("chatName").innerText = chatPartnerName;
     let msgField = document.getElementById("inputText");
     let chatsHandler = document.getElementById("chatsHandler");
-    window.addEventListener("load", changeGradient);
-    function changeGradient() {
-        document.body.style.background = `radial-gradient(circle, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 23%,
-     rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 51%,
-     rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 88%)`;
-        chatsHandler.scrollTop = chatsHandler.scrollHeight;
-    }
+    // window.addEventListener("load", changeGradient);
+    // function changeGradient(): void {
+    //     document.body.style.background = `radial-gradient(circle, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 23%,
+    //  rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 51%,
+    //  rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.75) 88%)`;
+    //     chatsHandler.scrollTop = chatsHandler.scrollHeight;
+    // }
     let chatHistory = lavida.ChatHistory.createNew(chatID, meUsername);
     let oldChatHistory = lavida.ChatHistory.createNew(chatID, meUsername);
     document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("click", (e) => __awaiter(this, void 0, void 0, function* () {

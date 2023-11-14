@@ -110,7 +110,7 @@ namespace lavida {
                 console.log(error);
             }
         }
-        async createChat(circle: Circle, _meUsername: string) {
+        async createChat(_userCard: UserCard, _meUsername: string) {
             try {
                 let response = await fetch('https://lavida-server.vercel.app/api/create_chat', {
                     method: 'POST',
@@ -123,7 +123,7 @@ namespace lavida {
                 if (response.status === 201) {
                     let rspTxt: string = await response.text() as string;
                     console.log(rspTxt);
-                    window.location.href = circle.href + `&chatID=${this.chat_id}` + `&me=${_meUsername}`;
+                    window.location.href = _userCard.href + `&chatID=${this.chat_id}` + `&me=${_meUsername}`;
                 } else {
                     let data = await response.json();
                     console.log(`Error: ${data.error}`);

@@ -6,18 +6,27 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>LaVida | Overview</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
+
     <link rel="stylesheet" href="/website/css/overview.css">
+
     <script src="/src/User.js" defer=""></script>
-    <script src="/src/Circle.js" defer=""></script>
-
+    <script src="/src/UserCard.js" defer=""></script>
     <script src="/src/ChatHistory.js" defer=""></script>
-
     <script src="/src/Overview.js" defer=""></script>
 </head>
 
 <body>
-    <canvas id="canvas" width="1920px" height="1080px"></canvas>
+    <div id="content">
+        <img src="/logo/logo_transparent.png" alt="LaVida Logo" id="logo">
 
+        <h2>Active Users</h2>
+        <div id="user-cards-container">
+            <div id="user-cards">
+                <!-- User cards will be dynamically created here -->
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
