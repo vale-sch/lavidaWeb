@@ -11,18 +11,11 @@ namespace lavida {
     fetchUsers();
 
     async function fetchUsers(): Promise<void> {
-        try {
-            const response = await fetch('https://lavida-server.vercel.app/api/get_users');
-            let usersFetched = await response.json();
-            let increment: number = 0;
-            usersFetched.forEach((userDB: any) => {
-                usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
-                increment++;
-            });
-            usersFetched = null;
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
+        let increment: number = 0;
+        (await User.fetchUsers()).forEach((userDB: any) => {
+            usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+            increment++;
+        });
     }
 
     async function checkCredentials() {
@@ -37,10 +30,10 @@ namespace lavida {
                 }
             }
         });
-        await new Promise(f => setTimeout(f, 100));
+        await new Promise(f => setTimeout(f, 50));
 
         if (thisUser.Id != 0) {
-            window.location.replace(`overview.html?user=${encodeURIComponent(userLogin.value)}`);
+            window.location.replace(`overview_page.html?user=${encodeURIComponent(userLogin.value)}`);
         }
     }
 

@@ -1,22 +1,6 @@
+
 namespace lavida {
-    class Circle {
-        public x: number = 0;
-        public y: number = 0;
-        public radius: number = 0;
-        public href: string = "";
-        public chatName: string = "";
-        constructor(_x: number = 0, _y: number = 0, _radius: number = 0, _href: string = "", _chatName: string) {
-            this.x = _x;
-            this.y = _y;
-            this.radius = _radius;
-            this.href = _href;
-            this.chatName = _chatName;
-        }
-
-    }
-
     window.addEventListener("load", changeGradient);
-
     function changeGradient(): void {
         document.body.style.background = `radial-gradient(circle, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()}) 23%,
      rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()}) 51%,
@@ -25,32 +9,28 @@ namespace lavida {
 
 
     let usersDB: User[] = [];
+
     let canvas: HTMLCanvasElement = document.getElementById('canvas') as HTMLCanvasElement;
     canvas.width = window.innerWidth * 0.95;
     canvas.height = window.innerHeight * 0.95;
+
     const params = new URLSearchParams(window.location.search);
     let meUsername = params.get("user") as string;
 
 
     async function fetchUsers(): Promise<void> {
-        try {
-            const response = await fetch('https://lavida-server.vercel.app/api/get_users');
-            let usersFetched = await response.json();
-            let increment: number = 0;
-            usersFetched.forEach((userDB: any) => {
-                usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
-                increment++;
-            });
-            usersFetched = null;
-            usersDB.forEach((user: any) => {
-                if (user.isactive && meUsername != user.name)
-                    draw(user.name);
-            });
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
+        let increment: number = 0;
+        (await User.fetchUsers()).forEach((userDB: any) => {
+            usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+            increment++;
+        });
+        usersDB.forEach((user: any) => {
+            if (user.isactive && meUsername != user.name)
+                draw(user.name);
+        });
     }
 
+    fetchUsers();
 
     let circles: Circle[] = [];
     let previousCircle: Circle | null = null;
@@ -106,37 +86,15 @@ namespace lavida {
                 const distance = Math.hypot(clickX - circle.x, clickY - circle.y);
                 if (distance <= circle.radius) {
                     let chatID: string = Math.floor((Date.now() + Math.random())).toString();
-                    createChat(chatID, circle);
+
+                    let chatHistory: ChatHistory = ChatHistory.createNew(chatID, username);
+                    chatHistory.createChat(circle, meUsername);
 
                 }
 
             });
         }
     }
-    async function createChat(chatID: string, circle: Circle) {
-        let chat: ChatHistory = ChatHistory.createNew(chatID, meUsername);
-        try {
-            let response = await fetch('https://lavida-server.vercel.app/api/create_chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(chat),
-            });
-
-            if (response.status === 201) {
-                let rspTxt: string = await response.text() as string;
-                console.log(rspTxt);
-                window.location.href = circle.href + `&chatID=${chatID}` + `&me=${meUsername}`;
-            } else {
-                let data = await response.json();
-                console.log(`Error: ${data.error}`);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
     function isOverlapping(circle: Circle): boolean {
         for (const prevCircle of circles) {
             let distance = Math.hypot(circle.x - prevCircle.x, circle.y - prevCircle.y);
@@ -157,19 +115,7 @@ namespace lavida {
 
         return false;
     }
-
-
-
-
-
     function getRandomNumber(min: number, max: number) {
         return Math.floor((Math.random() * (max - min)) + min);
     }
-
-
-
-
-    fetchUsers();
-
-
 }

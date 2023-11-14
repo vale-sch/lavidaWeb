@@ -18,19 +18,11 @@ var lavida;
     fetchUsers();
     function fetchUsers() {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const response = yield fetch('https://lavida-server.vercel.app/api/get_users');
-                let usersFetched = yield response.json();
-                let increment = 0;
-                usersFetched.forEach((userDB) => {
-                    usersDB[increment] = new lavida.User(userDB.id, userDB.name, userDB.password, userDB.isactive);
-                    increment++;
-                });
-                usersFetched = null;
-            }
-            catch (error) {
-                console.error('Error fetching users:', error);
-            }
+            let increment = 0;
+            (yield lavida.User.fetchUsers()).forEach((userDB) => {
+                usersDB[increment] = new lavida.User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+                increment++;
+            });
         });
     }
     function checkCredentials() {
@@ -46,9 +38,9 @@ var lavida;
                     }
                 }
             });
-            yield new Promise(f => setTimeout(f, 100));
+            yield new Promise(f => setTimeout(f, 50));
             if (thisUser.Id != 0) {
-                window.location.replace(`overview.html?user=${encodeURIComponent(userLogin.value)}`);
+                window.location.replace(`overview_page.html?user=${encodeURIComponent(userLogin.value)}`);
             }
         });
     }

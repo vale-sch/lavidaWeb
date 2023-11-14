@@ -48,8 +48,9 @@
     border-radius: 15px;
     width: fit-content;
     block-size: fit-content;
-    min-width: 35%;
-    max-width: 65%;
+    min-width: 20vb;
+    max-width: 65vb;
+    overflow-wrap: break-word;
     --r: 25px;
     /* the radius */
     --t: 30px;
