@@ -1,10 +1,4 @@
 namespace lavida {
-    // window.addEventListener("load", changeGradient);
-
-    // function changeGradient(): void {
-    //     document.body.style.background = `radial-gradient(circle, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()}) 23%, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()}) 51%, rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()}) 88%)`;
-    // }
-
     let usersDB: User[] = [];
 
     const params = new URLSearchParams(window.location.search);
