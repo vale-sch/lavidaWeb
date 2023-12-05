@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,27 +7,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var lavida;
-(function (lavida) {
-    let usersDB = [];
-    const params = new URLSearchParams(window.location.search);
-    let meUsername = params.get("user");
-    function fetchUsers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let increment = 0;
-            (yield lavida.User.fetchUsers()).forEach((userDB) => {
-                usersDB[increment] = new lavida.User(userDB.id, userDB.name, userDB.password, userDB.isactive);
-                increment++;
-            });
-            usersDB.forEach((user) => {
-                if (user.isactive && meUsername != user.name) {
-                    createUserCard(user);
-                }
-            });
+import { ChatHistory } from "./ChatHistory.js";
+import { User } from "./User.js";
+import { UserCard } from "./UserCard.js";
+//@ts-ignore
+const socket = io("ws://localhost:8080");
+let infoStreamObj;
+const params = new URLSearchParams(window.location.search);
+let meUsername = params.get("user");
+function buildUsers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield User.fetchUsers();
+        User.usersDB.forEach((user) => {
+            if (user.isActive && meUsername != user.Name) {
+                createUserCard(user);
+            }
         });
-    }
-    function createUserCard(user) {
-        let userCard = new lavida.UserCard(`chat_page.html?user=${user.Name}`, user.Name);
+    });
+}
+function startSocket() {
+    socket.on("message", (infoStream) => {
+        infoStreamObj = JSON.parse(infoStream);
+        if (infoStreamObj.myUsername == meUsername) {
+            if (confirm(`You got a new Chat Request from ${infoStreamObj.partnerUsername}`) == true) {
+                window.location.href = infoStreamObj.url + `&chatID=${infoStreamObj.chatID}` + `&me=${infoStreamObj.myUsername}`;
+            }
+            else {
+                infoStreamObj.acceptedChatInvite = false;
+                socket.emit("message", JSON.stringify(infoStream));
+                ;
+            }
+            ;
+            ;
+        }
+    });
+}
+function createUserCard(user) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let userCard = new UserCard(`chat_page.html?user=${user.Name}`, user.Name);
         const userCardsContainer = document.getElementById('user-cards');
         if (userCardsContainer) {
             const userCardDiv = document.createElement('div');
@@ -41,14 +57,35 @@ var lavida;
             const userName = document.createElement('h3');
             userName.textContent = user.Name;
             userCardDiv.appendChild(userName);
-            userCardDiv.addEventListener('click', () => {
+            userCardDiv.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 // Handle click event for the user card (e.g., redirect to chat page)
                 let chatID = Math.floor((Date.now() + Math.random())).toString();
-                let chatHistory = lavida.ChatHistory.createNew(chatID, user.Name);
+                let chatHistory = ChatHistory.createNew(chatID, user.Name);
+                //create a JSON Format for meUsername, chatID and userName and the whole URL 
+                let infoStream = {
+                    url: `chat_page.html?user=${meUsername}` + `&chatID=${chatID}` + `&me=${user.Name}`,
+                    myUsername: user.Name,
+                    chatID: chatID,
+                    partnerUsername: meUsername,
+                    acceptedChatInvite: false
+                };
+                socket.emit("message", JSON.stringify(infoStream));
+                let time_out = 5000;
+                yield new Promise((resolve) => {
+                    const interval = setInterval(() => {
+                        if (infoStream.acceptedChatInvite || time_out <= 0) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                        time_out -= 20;
+                        console.log(time_out);
+                    }, 20);
+                });
                 chatHistory.createChat(userCard, meUsername);
-            });
+            }));
             userCardsContainer.appendChild(userCardDiv);
         }
-    }
-    fetchUsers();
-})(lavida || (lavida = {}));
+    });
+}
+buildUsers();
+startSocket();

@@ -1,13 +1,12 @@
-namespace lavida {
-    export class UserCard {
+export class UserCard {
 
-        public href: string = "";
-        public chatName: string = "";
-        constructor(_href: string = "", _chatName: string) {
+    public href: string = "";
+    public chatName: string = "";
+    constructor(_href: string = "", _chatName: string) {
 
-            this.href = _href;
-            this.chatName = _chatName;
-        }
-
+        this.href = _href;
+        this.chatName = _chatName;
     }
+
 }
+
