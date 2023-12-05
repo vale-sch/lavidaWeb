@@ -19,7 +19,6 @@ document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("
         let msgToSend: string = msgField.innerText;
         msgField.innerText = "";
         await chatHistory.sendMsg(chatID, meUsername, msgToSend);
-        getNewMessages(chatID);
     }
 });
 
@@ -30,33 +29,50 @@ document.addEventListener('keydown', async (e) => {
             let msgToSend: string = msgField.innerText;
             msgField.innerText = "";
             await chatHistory.sendMsg(chatID, meUsername, msgToSend);
-            getNewMessages(chatID);
         }
-
     }
 });
 
 function handleReceiveMsg(senderID: string, message: string, timeSent: string): void {
-    if (chatPartnerName == senderID)
-        console.log("mymessage");
     let msg: HTMLParagraphElement = document.createElement("p");
     msg.className = "txt"
     msg.innerText = message;
 
-    let sentDiv: HTMLDivElement = document.createElement("div");
-    sentDiv.className = "messageDiv received"
+    if (chatPartnerName == senderID) {
 
-    let imgMe: HTMLImageElement = document.createElement("img");
-    imgMe.src = "/avatars/2.png";
 
-    let span: HTMLSpanElement = document.createElement("span");
-    span.className = "time-left";
-    span.innerHTML = timeSent;
-    sentDiv.appendChild(imgMe);
-    sentDiv.appendChild(msg);
-    sentDiv.appendChild(span);
+        let receivedDiv: HTMLDivElement = document.createElement("div");
+        receivedDiv.className = "messageDiv received"
 
-    chatsHandler.appendChild(sentDiv);
+        let imgPartner: HTMLImageElement = document.createElement("img");
+        imgPartner.src = "/avatars/2.png";
+
+        let span: HTMLSpanElement = document.createElement("span");
+        span.className = "time-left";
+        span.innerHTML = timeSent;
+        receivedDiv.appendChild(imgPartner);
+        receivedDiv.appendChild(msg);
+        receivedDiv.appendChild(span);
+        chatsHandler.appendChild(receivedDiv);
+
+    } else {
+        let sentDiv: HTMLDivElement = document.createElement("div");
+        sentDiv.className = "messageDiv sent"
+
+        let imgMe: HTMLImageElement = document.createElement("img");
+        imgMe.src = "/avatars/1.png";
+
+        let span: HTMLSpanElement = document.createElement("span");
+        span.className = "time-right";
+        span.innerHTML = timeSent;
+        sentDiv.appendChild(imgMe);
+        sentDiv.appendChild(msg);
+        sentDiv.appendChild(span);
+        chatsHandler.appendChild(sentDiv);
+    }
+    console.log(senderID, chatPartnerName);
+
+
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 
 
@@ -68,11 +84,17 @@ async function getNewMessages(_chatID: string) {
         let newMsg: Message = chatHistory.messages[oldChatHistory.messages.length];
         oldChatHistory.messages.push(newMsg);
         handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
-
     }
+    // startFetchingMessages(chatID);
 }
-// Example usage
-getNewMessages(chatID);
 
+// Function to fetch messages at intervals
+function startFetchingMessages(chatID: string) {
+    setInterval(async () => {
+        await getNewMessages(chatID);
+    }, 1000); // 100 milliseconds interval
 
+}
+startFetchingMessages(chatID);
 
+// Example usage to start fetching messages

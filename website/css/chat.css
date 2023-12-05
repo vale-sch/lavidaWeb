@@ -21,6 +21,7 @@ background: linear-gradient(135deg, #71b7e6, #9b59b6);
 #chatsHandler{
     overflow: scroll;
     height: 80%;
+    width: 80vw;
     display: inline-block;
     size: fixed;
 }
@@ -139,6 +140,7 @@ hr {
     margin: 1em 0;
 }
 #chatBox {
+    overflow: scroll;
     display: block;
     height: fit-content;
     border: 0;
@@ -146,7 +148,15 @@ hr {
     margin: 1em 0;
     padding: 5px;
 }
-
+#chatBox::-webkit-scrollbar {
+    display: none;
+}
+#chatBox {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
 #inputText{
     position: absolute;
     height: fit-content;
