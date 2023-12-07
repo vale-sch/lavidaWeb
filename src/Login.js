@@ -17,6 +17,7 @@ function addEvents() {
         if (buttonDiv == null)
             return;
         yield User.fetchUsers();
+        console.log("HAS FETCHED");
         if (User.usersDB != null) {
             buttonDiv.onclick = checkCredentials;
             document.addEventListener('keydown', (e) => __awaiter(this, void 0, void 0, function* () {
@@ -32,7 +33,7 @@ function checkCredentials() {
         console.log((!userLogin.value || !userPassword.value));
         if (!userLogin.value || !userPassword.value)
             return;
-        let thisUser = new User(0, "", "", false);
+        let thisUser = new User(0, "", "");
         User.usersDB.forEach((userDB) => {
             if (userLogin.value == userDB.Name) {
                 console.log(userDB.Name);

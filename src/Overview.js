@@ -11,7 +11,7 @@ import { ChatHistory } from "./ChatHistory.js";
 import { User } from "./User.js";
 import { UserCard } from "./UserCard.js";
 //@ts-ignore
-const socket = io("ws://localhost:8080");
+const socket = io("wss://lavidasocket.onrender.com");
 let infoStreamObj;
 const params = new URLSearchParams(window.location.search);
 let meUsername = params.get("user");
