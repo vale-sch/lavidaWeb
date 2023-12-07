@@ -17,7 +17,6 @@ function addEvents() {
         if (buttonDiv == null)
             return;
         yield User.fetchUsers();
-        console.log("HAS FETCHED");
         if (User.usersDB != null) {
             buttonDiv.onclick = checkCredentials;
             document.addEventListener('keydown', (e) => __awaiter(this, void 0, void 0, function* () {
@@ -30,19 +29,17 @@ function addEvents() {
 }
 function checkCredentials() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log((!userLogin.value || !userPassword.value));
         if (!userLogin.value || !userPassword.value)
             return;
         let thisUser = new User(0, "", "");
         User.usersDB.forEach((userDB) => {
             if (userLogin.value == userDB.Name) {
-                console.log(userDB.Name);
                 if (userPassword.value == userDB.Password) {
                     thisUser = userDB;
                 }
             }
         });
-        yield new Promise(f => setTimeout(f, 50));
+        yield new Promise(f => setTimeout(f, 75));
         if (thisUser.Id != 0) {
             window.location.replace(`overview_page.html?user=${encodeURIComponent(userLogin.value)}`);
         }

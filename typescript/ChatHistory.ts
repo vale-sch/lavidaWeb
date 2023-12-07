@@ -41,7 +41,7 @@ export class ChatHistory {
         this.messages.push(newMessage);
     }
 
-    async getChatHistory(_chatID: string): Promise<ChatHistory | null> {
+    static async getChatHistory(_chatID: string): Promise<ChatHistory | null> {
         try {
             const response = await fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${_chatID}`, {
                 method: 'GET',

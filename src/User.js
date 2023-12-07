@@ -28,7 +28,6 @@ export class User {
     }
     pushUser() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(JSON.stringify(this));
             try {
                 let response = yield fetch('https://lavida-server.vercel.app/api/create_user', {
                     method: 'POST',

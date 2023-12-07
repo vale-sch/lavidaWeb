@@ -22,8 +22,6 @@ export class User {
     }
 
     async pushUser() {
-        console.log(JSON.stringify(this));
-
         try {
             let response = await fetch('https://lavida-server.vercel.app/api/create_user', {
                 method: 'POST',

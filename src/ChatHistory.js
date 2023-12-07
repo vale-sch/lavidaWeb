@@ -31,7 +31,7 @@ export class ChatHistory {
         };
         this.messages.push(newMessage);
     }
-    getChatHistory(_chatID) {
+    static getChatHistory(_chatID) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${_chatID}`, {

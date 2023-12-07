@@ -4,16 +4,22 @@ import { User } from "./User.js";
 import { UserCard } from "./UserCard.js";
 
 
+/*
 //@ts-ignore
+deployed one
 const socket: Socket = io("wss://lavidasocket.onrender.com");
 
 
-
+*/
+/*localOne
+//@ts-ignore*/
+const socket: Socket = io("ws://localhost:8080");
 
 let infoStreamObj: InfoStream
 
 const params = new URLSearchParams(window.location.search);
 let meUsername = params.get("user") as string;
+
 async function buildUsers(): Promise<void> {
     await User.fetchUsers();
     User.usersDB.forEach((user: User) => {
@@ -23,19 +29,18 @@ async function buildUsers(): Promise<void> {
     });
 }
 function startSocket(): void {
-    socket.on("message", (infoStream: string) => {
+    socket.on("infoStream", (infoStream: string) => {
         infoStreamObj = JSON.parse(infoStream) as InfoStream;
         if (infoStreamObj.myUsername == meUsername) {
             document.addEventListener('keydown', async (e) => {
                 if ((e as KeyboardEvent).key === 'Enter') {
                     infoStreamObj.acceptedChatInvite = true;
-                    socket.emit("message", JSON.stringify(infoStreamObj));
-
+                    socket.emit("infoStream", JSON.stringify(infoStreamObj));
                     window.location.href = infoStreamObj.url;
                 }
                 // if ((e as KeyboardEvent).key === 'ESC') {
                 //     infoStreamObj.acceptedChatInvite = false;
-                //     socket.emit("message", JSON.stringify(infoStream));;
+                //     socket.emit("infoStream", JSON.stringify(infoStream));;
                 // }
             });
 
@@ -44,7 +49,7 @@ function startSocket(): void {
             //     window.location.href = infoStreamObj.url + `&chatID=${infoStreamObj.chatID}` + `&me=${infoStreamObj.myUsername}`;
             // } else {
             //     infoStreamObj.acceptedChatInvite = false;
-            //     socket.emit("message", JSON.stringify(infoStream));;
+            //     socket.emit("infoStream", JSON.stringify(infoStream));;
             // }
             // ;
             // ;
@@ -86,12 +91,11 @@ async function createUserCard(user: User): Promise<void> {
                 acceptedChatInvite: false
             };
 
-            socket.emit("message", JSON.stringify(infoStream));
+            socket.emit("infoStream", JSON.stringify(infoStream));
             let time_out: number = 50000000;
 
             await new Promise<void>((resolve) => {
                 const interval = setInterval(() => {
-                    console.log(infoStreamObj.acceptedChatInvite)
                     if (infoStreamObj.acceptedChatInvite || time_out <= 0) {
                         clearInterval(interval);
                         resolve();

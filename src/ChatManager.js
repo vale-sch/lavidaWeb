@@ -17,11 +17,50 @@ let msgField = document.getElementById("inputText");
 let chatsHandler = document.getElementById("chatsHandler");
 let chatHistory = ChatHistory.createNew(chatID, meUsername);
 let oldChatHistory = ChatHistory.createNew(chatID, meUsername);
+startSocket();
+function startSocket() {
+    //@ts-ignore
+    const socket = io("ws://localhost:8080");
+    let oldChatHistory = chatHistory;
+    console.log("HI");
+    socket.on("chat=1701971307720", (chatHistoryStream) => {
+        let chatHistoryTemp = JSON.parse(chatHistoryStream);
+        while (oldChatHistory.messages.length < chatHistoryTemp[0].messages.length) {
+            let newMsg = chatHistory.messages[oldChatHistory.messages.length];
+            oldChatHistory.messages.push(newMsg);
+            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        }
+    });
+}
+function sendMsg(chatID, senderID, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        chatHistory.addMessage(senderID, message);
+        try {
+            let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(chatHistory),
+            });
+            if (response.status === 201) {
+                yield response.json();
+            }
+            else {
+                let data = yield response.json();
+                console.log(`Error: ${data.error}`);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    });
+}
 document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("click", (e) => __awaiter(void 0, void 0, void 0, function* () {
     if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
         let msgToSend = msgField.innerText;
         msgField.innerText = "";
-        yield chatHistory.sendMsg(chatID, meUsername, msgToSend);
+        yield sendMsg(chatID, meUsername, msgToSend);
     }
 }));
 document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, function* () {
@@ -31,11 +70,11 @@ document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, fu
         if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
             let msgToSend = msgField.innerText;
             msgField.innerText = "";
-            yield chatHistory.sendMsg(chatID, meUsername, msgToSend);
+            yield sendMsg(chatID, meUsername, msgToSend);
         }
     }
 }));
-function handleReceiveMsg(senderID, message, timeSent) {
+export function handleReceiveMsg(senderID, message, timeSent) {
     let msg = document.createElement("p");
     msg.className = "txt";
     msg.innerText = message;
@@ -65,12 +104,11 @@ function handleReceiveMsg(senderID, message, timeSent) {
         sentDiv.appendChild(span);
         chatsHandler.appendChild(sentDiv);
     }
-    console.log(senderID, chatPartnerName);
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
 function getNewMessages(_chatID) {
     return __awaiter(this, void 0, void 0, function* () {
-        chatHistory = (yield chatHistory.getChatHistory(chatID));
+        chatHistory = (yield ChatHistory.getChatHistory(chatID));
         while (oldChatHistory.messages.length < chatHistory.messages.length) {
             let newMsg = chatHistory.messages[oldChatHistory.messages.length];
             oldChatHistory.messages.push(newMsg);
@@ -79,11 +117,12 @@ function getNewMessages(_chatID) {
         // startFetchingMessages(chatID);
     });
 }
-// Function to fetch messages at intervals
-function startFetchingMessages(chatID) {
-    setInterval(() => __awaiter(this, void 0, void 0, function* () {
-        yield getNewMessages(chatID);
-    }), 1000); // 100 milliseconds interval
-}
-startFetchingMessages(chatID);
+// // Function to fetch messages at intervals
+// function startFetchingMessages(chatID: string) {
+//     setInterval(async () => {
+//         await getNewMessages(chatID);
+//     }, 1000); // 100 milliseconds interval
+// }
+getNewMessages(chatID);
+export default chatHistory;
 // Example usage to start fetching messages
