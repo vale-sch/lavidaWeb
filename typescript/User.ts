@@ -1,15 +1,18 @@
 export class User {
     public static usersDB: User[] = [];
-
-    private id: number = 0;
-    private name: string = "";
-    private password: string = "";
+    public ioClinetID: string = "";
     public isActive: boolean = true;
 
-    constructor(_id: number, _name: string, _password: string) {
+    private name: string = "";
+    private password: string = "";
+    private id: number = 0;
+
+
+    constructor(_id: number, _name: string, _password: string, _isActive: boolean) {
         this.id = _id;
         this.name = _name;
         this.password = _password;
+        this.isActive = _isActive;
     }
     public get Id(): number {
         return this.id;
@@ -49,7 +52,7 @@ export class User {
             let usersFetched = await response.json();
             let increment: number = 0;
             usersFetched.forEach((userDB: any) => {
-                User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password);
+                User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
                 increment++;
             });
         } catch (error) {

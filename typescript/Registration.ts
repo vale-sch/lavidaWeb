@@ -13,7 +13,7 @@ function registrateMe(): void {
     let passwordValue: string = (document.getElementById("password") as HTMLInputElement).value;
 
     if (!nameValue || !passwordValue) return;
-    let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue);
+    let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false);
     newUser.pushUser();
 
 }

@@ -8,14 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 export class User {
-    constructor(_id, _name, _password) {
-        this.id = 0;
+    constructor(_id, _name, _password, _isActive) {
+        this.ioClinetID = "";
+        this.isActive = true;
         this.name = "";
         this.password = "";
-        this.isActive = true;
+        this.id = 0;
         this.id = _id;
         this.name = _name;
         this.password = _password;
+        this.isActive = _isActive;
     }
     get Id() {
         return this.id;
@@ -58,7 +60,7 @@ export class User {
                 let usersFetched = yield response.json();
                 let increment = 0;
                 usersFetched.forEach((userDB) => {
-                    User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password);
+                    User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
                     increment++;
                 });
             }

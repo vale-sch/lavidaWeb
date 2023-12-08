@@ -1,62 +1,32 @@
 import { ChatHistory } from "./ChatHistory.js";
 import { InfoStream } from "./InfoStream.js";
+import { connectClientID, requestChatpartner, requestInfoObj, socket } from "./SocketConnection.js";
 import { User } from "./User.js";
 import { UserCard } from "./UserCard.js";
 
 
-/*
-//@ts-ignore
-deployed one
-const socket: Socket = io("wss://lavidasocket.onrender.com");
 
-
-*/
-/*localOne
-//@ts-ignore*/
-const socket: Socket = io("ws://localhost:8080");
-
-let infoStreamObj: InfoStream
 
 const params = new URLSearchParams(window.location.search);
 let meUsername = params.get("user") as string;
-
+export let me: User;
 async function buildUsers(): Promise<void> {
     await User.fetchUsers();
     User.usersDB.forEach((user: User) => {
         if (user.isActive && meUsername != user.Name) {
             createUserCard(user);
         }
-    });
-}
-function startSocket(): void {
-    socket.on("infoStream", (infoStream: string) => {
-        infoStreamObj = JSON.parse(infoStream) as InfoStream;
-        if (infoStreamObj.myUsername == meUsername) {
-            document.addEventListener('keydown', async (e) => {
-                if ((e as KeyboardEvent).key === 'Enter') {
-                    infoStreamObj.acceptedChatInvite = true;
-                    socket.emit("infoStream", JSON.stringify(infoStreamObj));
-                    window.location.href = infoStreamObj.url;
-                }
-                // if ((e as KeyboardEvent).key === 'ESC') {
-                //     infoStreamObj.acceptedChatInvite = false;
-                //     socket.emit("infoStream", JSON.stringify(infoStream));;
-                // }
-            });
-
-
-            // if (confirm(`You got a new Chat Request from ${infoStreamObj.partnerUsername}`) == true) {
-            //     window.location.href = infoStreamObj.url + `&chatID=${infoStreamObj.chatID}` + `&me=${infoStreamObj.myUsername}`;
-            // } else {
-            //     infoStreamObj.acceptedChatInvite = false;
-            //     socket.emit("infoStream", JSON.stringify(infoStream));;
-            // }
-            // ;
-            // ;
-
+        if (meUsername == user.Name) {
+            me = user;
+            connectClientID(me.Id);
+            requestChatpartner(meUsername);
         }
     });
 }
+
+
+
+
 
 
 async function createUserCard(user: User): Promise<void> {
@@ -96,7 +66,7 @@ async function createUserCard(user: User): Promise<void> {
 
             await new Promise<void>((resolve) => {
                 const interval = setInterval(() => {
-                    if (infoStreamObj.acceptedChatInvite || time_out <= 0) {
+                    if (requestInfoObj.acceptedChatInvite || time_out <= 0) {
                         clearInterval(interval);
                         resolve();
                     }
@@ -114,4 +84,4 @@ async function createUserCard(user: User): Promise<void> {
 }
 
 buildUsers();
-startSocket();
+

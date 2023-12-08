@@ -20,6 +20,6 @@ function registrateMe() {
     let passwordValue = document.getElementById("password").value;
     if (!nameValue || !passwordValue)
         return;
-    let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue);
+    let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false);
     newUser.pushUser();
 }

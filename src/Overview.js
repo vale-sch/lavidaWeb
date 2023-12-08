@@ -8,21 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { ChatHistory } from "./ChatHistory.js";
+import { connectClientID, requestChatpartner, requestInfoObj, socket } from "./SocketConnection.js";
 import { User } from "./User.js";
 import { UserCard } from "./UserCard.js";
-/*
-//@ts-ignore
-deployed one
-const socket: Socket = io("wss://lavidasocket.onrender.com");
-
-
-*/
-/*localOne
-//@ts-ignore*/
-const socket = io("ws://localhost:8080");
-let infoStreamObj;
 const params = new URLSearchParams(window.location.search);
 let meUsername = params.get("user");
+export let me;
 function buildUsers() {
     return __awaiter(this, void 0, void 0, function* () {
         yield User.fetchUsers();
@@ -30,33 +21,12 @@ function buildUsers() {
             if (user.isActive && meUsername != user.Name) {
                 createUserCard(user);
             }
+            if (meUsername == user.Name) {
+                me = user;
+                connectClientID(me.Id);
+                requestChatpartner(meUsername);
+            }
         });
-    });
-}
-function startSocket() {
-    socket.on("infoStream", (infoStream) => {
-        infoStreamObj = JSON.parse(infoStream);
-        if (infoStreamObj.myUsername == meUsername) {
-            document.addEventListener('keydown', (e) => __awaiter(this, void 0, void 0, function* () {
-                if (e.key === 'Enter') {
-                    infoStreamObj.acceptedChatInvite = true;
-                    socket.emit("infoStream", JSON.stringify(infoStreamObj));
-                    window.location.href = infoStreamObj.url;
-                }
-                // if ((e as KeyboardEvent).key === 'ESC') {
-                //     infoStreamObj.acceptedChatInvite = false;
-                //     socket.emit("infoStream", JSON.stringify(infoStream));;
-                // }
-            }));
-            // if (confirm(`You got a new Chat Request from ${infoStreamObj.partnerUsername}`) == true) {
-            //     window.location.href = infoStreamObj.url + `&chatID=${infoStreamObj.chatID}` + `&me=${infoStreamObj.myUsername}`;
-            // } else {
-            //     infoStreamObj.acceptedChatInvite = false;
-            //     socket.emit("infoStream", JSON.stringify(infoStream));;
-            // }
-            // ;
-            // ;
-        }
     });
 }
 function createUserCard(user) {
@@ -90,7 +60,7 @@ function createUserCard(user) {
                 let time_out = 50000000;
                 yield new Promise((resolve) => {
                     const interval = setInterval(() => {
-                        if (infoStreamObj.acceptedChatInvite || time_out <= 0) {
+                        if (requestInfoObj.acceptedChatInvite || time_out <= 0) {
                             clearInterval(interval);
                             resolve();
                         }
@@ -105,4 +75,3 @@ function createUserCard(user) {
     });
 }
 buildUsers();
-startSocket();

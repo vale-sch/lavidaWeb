@@ -31,7 +31,7 @@ function checkCredentials() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!userLogin.value || !userPassword.value)
             return;
-        let thisUser = new User(0, "", "");
+        let thisUser = new User(0, "", "", true);
         User.usersDB.forEach((userDB) => {
             if (userLogin.value == userDB.Name) {
                 if (userPassword.value == userDB.Password) {

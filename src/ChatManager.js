@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { ChatHistory } from "./ChatHistory.js";
+import { socket } from "./SocketConnection.js";
 const params = new URLSearchParams(window.location.search);
 let chatPartnerName = params.get("user");
 let chatID = params.get("chatID");
@@ -15,24 +16,9 @@ let meUsername = params.get("me");
 document.getElementById("chatName").innerText = chatPartnerName;
 let msgField = document.getElementById("inputText");
 let chatsHandler = document.getElementById("chatsHandler");
-let chatHistory = ChatHistory.createNew(chatID, meUsername);
+export let chatHistory = ChatHistory.createNew(chatID, meUsername);
 let oldChatHistory = ChatHistory.createNew(chatID, meUsername);
-startSocket();
-function startSocket() {
-    //@ts-ignore
-    const socket = io("ws://localhost:8080");
-    let oldChatHistory = chatHistory;
-    console.log("HI");
-    socket.on("chat=1701971307720", (chatHistoryStream) => {
-        let chatHistoryTemp = JSON.parse(chatHistoryStream);
-        while (oldChatHistory.messages.length < chatHistoryTemp[0].messages.length) {
-            let newMsg = chatHistory.messages[oldChatHistory.messages.length];
-            oldChatHistory.messages.push(newMsg);
-            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
-        }
-    });
-}
-function sendMsg(chatID, senderID, message) {
+function sendMsg(senderID, message) {
     return __awaiter(this, void 0, void 0, function* () {
         chatHistory.addMessage(senderID, message);
         try {
@@ -60,7 +46,7 @@ document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("
     if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
         let msgToSend = msgField.innerText;
         msgField.innerText = "";
-        yield sendMsg(chatID, meUsername, msgToSend);
+        yield sendMsg(meUsername, msgToSend);
     }
 }));
 document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, function* () {
@@ -70,7 +56,7 @@ document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, fu
         if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
             let msgToSend = msgField.innerText;
             msgField.innerText = "";
-            yield sendMsg(chatID, meUsername, msgToSend);
+            yield sendMsg(meUsername, msgToSend);
         }
     }
 }));
@@ -106,23 +92,18 @@ export function handleReceiveMsg(senderID, message, timeSent) {
     }
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
-function getNewMessages(_chatID) {
-    return __awaiter(this, void 0, void 0, function* () {
-        chatHistory = (yield ChatHistory.getChatHistory(chatID));
-        while (oldChatHistory.messages.length < chatHistory.messages.length) {
+function chatStream(chatHistory) {
+    let oldChatHistory = chatHistory;
+    console.log("JO");
+    socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream) => {
+        let chatHistoryTemp = JSON.parse(chatHistoryStream);
+        console.log(chatHistoryTemp);
+        while (oldChatHistory.messages.length < chatHistoryTemp[0].messages.length) {
             let newMsg = chatHistory.messages[oldChatHistory.messages.length];
             oldChatHistory.messages.push(newMsg);
             handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
         }
-        // startFetchingMessages(chatID);
     });
 }
-// // Function to fetch messages at intervals
-// function startFetchingMessages(chatID: string) {
-//     setInterval(async () => {
-//         await getNewMessages(chatID);
-//     }, 1000); // 100 milliseconds interval
-// }
-getNewMessages(chatID);
-export default chatHistory;
-// Example usage to start fetching messages
+//connectClient(me);
+chatStream(chatHistory);

@@ -25,7 +25,7 @@ async function addEvents(): Promise<void> {
 async function checkCredentials() {
     if (!userLogin.value || !userPassword.value) return;
 
-    let thisUser: User = new User(0, "", "");
+    let thisUser: User = new User(0, "", "", true);
     User.usersDB.forEach((userDB: User) => {
         if (userLogin.value == userDB.Name) {
             if (userPassword.value == userDB.Password) {
