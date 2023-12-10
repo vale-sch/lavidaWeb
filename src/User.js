@@ -8,8 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 export class User {
-    constructor(_id, _name, _password, _isActive) {
-        this.ioClientID = "";
+    constructor(_id, _name, _password, _isActive, chats) {
         this.isActive = true;
         this.name = "";
         this.password = "";
@@ -18,6 +17,7 @@ export class User {
         this.name = _name;
         this.password = _password;
         this.isActive = _isActive;
+        this.chats = chats;
     }
     get Id() {
         return this.id;
@@ -27,6 +27,30 @@ export class User {
     }
     get Password() {
         return this.password;
+    }
+    updateChatsInUser(chat, userID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let response = yield fetch('https://lavida-server.vercel.app/api/push_chat_to_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ chat, userID }),
+                });
+                if (response.status === 200) {
+                    let responseJSON = yield response.json();
+                    console.log(responseJSON);
+                }
+                else {
+                    let data = yield response.json();
+                    console.log(`Error: ${data.error}`);
+                }
+            }
+            catch (error) {
+                console.error('Error creating user:', error);
+            }
+        });
     }
     pushUser() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -40,7 +64,7 @@ export class User {
                 });
                 if (response.status === 201) {
                     yield response.json();
-                    window.location.replace("login_page.html");
+                    window.location.replace("laVidaChat.html");
                     alert("You have been successfull registrated!");
                 }
                 else {
@@ -60,7 +84,7 @@ export class User {
                 let usersFetched = yield response.json();
                 let increment = 0;
                 usersFetched.forEach((userDB) => {
-                    User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive);
+                    User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive, userDB.chats);
                     increment++;
                 });
             }

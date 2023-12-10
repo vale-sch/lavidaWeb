@@ -7,23 +7,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { onStartChatManager } from "./ChatManager.js";
-import { createChatPage } from "./SiteChanger.js";
 export class ChatHistory {
-    constructor(chat_id, messages) {
+    constructor(chat_id, messages, participants) {
         this.chat_id = chat_id;
         this.messages = messages;
+        this.participants = participants;
     }
-    static createNew(chat_id, sender_id) {
+    static createNew(chat_id, sender_id, participants) {
         const newMessage = {
             sender_id: sender_id,
             message: "",
             time_sent: "",
         };
-        return new ChatHistory(chat_id, [newMessage]);
+        return new ChatHistory(chat_id, [newMessage], participants);
     }
     static fromDatabase(data) {
-        return new ChatHistory(data.chat_id, data.messages);
+        return new ChatHistory(data.chat_id, data.messages, data.participants);
     }
     addMessage(sender_id, message) {
         const newMessage = {
@@ -55,11 +54,11 @@ export class ChatHistory {
             }
             catch (error) {
                 console.error(error);
-                return null;
+                return `Nothing fetched: ${error}`;
             }
         });
     }
-    sendMsg(chatID, senderID, message) {
+    sendMsg(senderID, message) {
         return __awaiter(this, void 0, void 0, function* () {
             this.addMessage(senderID, message);
             try {
@@ -106,7 +105,7 @@ export class ChatHistory {
             }
         });
     }
-    createChat(_userCard, _meUsername) {
+    createChat() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let response = yield fetch('https://lavida-server.vercel.app/api/create_chat', {
@@ -118,8 +117,6 @@ export class ChatHistory {
                 });
                 if (response.status === 201) {
                     yield response.text();
-                    createChatPage();
-                    onStartChatManager();
                 }
                 else {
                     let data = yield response.json();

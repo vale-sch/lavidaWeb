@@ -3,76 +3,106 @@
 export function cleanLogin(toRegistrate: boolean = false) {
     let wrapper: HTMLDivElement = document.getElementsByClassName("wrapper")[0] as HTMLDivElement;
     let lavidalogo: HTMLImageElement = document.getElementById("lavida") as HTMLImageElement;
-    console.log("HJI");
     document.body.removeChild(wrapper);
     if (toRegistrate != true)
-        document.body.removeChild(lavidalogo)
+        document.body.removeChild(lavidalogo);
 }
 
 
 export function createRegistrateHTML() {
 
 }
-export function createOvervieHTML() {
-    let divContent: HTMLDivElement = document.createElement("div");
-    let divUserCardsContainer: HTMLDivElement = document.createElement("div");
-    let divUserCards: HTMLDivElement = document.createElement("div");
 
-    let lavidalogo: HTMLImageElement = document.createElement("img");
-    lavidalogo.src = "/logo/logo_transparent.png";
-
-    let h2: HTMLHeadElement = document.createElement("h2");
-    h2.innerHTML = "Active Users";
-
-
-
-    divContent.id = "content";
-    lavidalogo.id = "logo";
-    divUserCardsContainer.id = "user-cards-container";
-    divUserCards.id = "user-cards";
-
-    divContent.appendChild(lavidalogo)
-    divContent.appendChild(h2)
-    divContent.appendChild(divUserCardsContainer);
-    divUserCardsContainer.appendChild(divUserCards);
-    document.body.appendChild(divContent);
-}
 export function createChatPage() {
-    let childToRemove: HTMLDivElement = document.getElementById("content") as HTMLDivElement;
-    document.body.removeChild(childToRemove);
-
-    let chatContainer: HTMLDivElement = document.createElement("div");
-    let chatPartner: HTMLDivElement = document.createElement("div");
-    let chatPartnerName: HTMLHeadingElement = document.createElement("h1");
-    let hrElement: HTMLHRElement = document.createElement("hr");
-    let chatsHandler: HTMLDivElement = document.createElement("div");
-    let chatBox: HTMLDivElement = document.createElement("div");
-    let inputText: HTMLSpanElement = document.createElement("span");
-    let sendBtn: HTMLDivElement = document.createElement("div");
-    let btn: HTMLButtonElement = document.createElement("button");
-
-    chatContainer.id = "chatContainer"
-    chatPartner.id = "chatParter"
-    chatPartnerName.id = "chatName"
-    chatsHandler.id = "chatsHandler"
-    chatBox.id = "chatBox"
-    inputText.id = "inputText"
-    sendBtn.id = "sendBtn"
-    btn.className = "fa-solid fa-paper-plane"
-    chatContainer.appendChild(chatPartner);
-    chatContainer.appendChild(chatsHandler);
-    chatContainer.appendChild(chatBox);
-    chatPartner.appendChild(chatPartnerName);
-    chatPartner.appendChild(hrElement);
-
-    chatBox.appendChild(inputText);
-    inputText.role = "textbox";
-    inputText.contentEditable = "true"
-    chatBox.appendChild(sendBtn);
-    sendBtn.appendChild(btn);
-    document.body.appendChild(chatContainer);
-
-
-
-
+    // Append the generated chat container to the body
+    const generatedChatContainer = generateChatContainer();
+    document.body.appendChild(generatedChatContainer);
 }
+
+// Function to create an element with specified attributes
+function createElement(tag: string, attributes: { [key: string]: string }): HTMLElement {
+    const element = document.createElement(tag);
+    for (const key in attributes) {
+        element.setAttribute(key, attributes[key]);
+    }
+    return element;
+}
+function createElementWithClasses(
+    tag: string,
+    attributes: { [key: string]: string },
+    classes: string[]
+): HTMLElement {
+    const element = createElement(tag, attributes);
+    element.classList.add(...classes);
+    return element;
+}
+
+// Function to generate the chat container
+function generateChatContainer(): HTMLElement {
+    const chatContainer = createElement('div', { class: 'chat-container' });
+
+    // Sidebar
+    const sidebar = createElementWithClasses('div', { class: 'sidebar' }, ['full-height']);
+    const savedChats = createElement('div', { class: 'saved-chats' });
+    savedChats.innerHTML = `
+    <h3>Saved Chats</h3>
+    <ul id="savedChats">
+      
+    </ul>`;
+    const activeUsers = createElement('div', { class: 'active-users' });
+    activeUsers.innerHTML = `
+    <h3>Active Users</h3>
+    <ul id="activeUsers">
+      
+    </ul>`;
+    sidebar.appendChild(savedChats);
+    sidebar.appendChild(activeUsers);
+
+    // Chat window
+    const chatWindow = createElementWithClasses('div', { class: 'chat-window' }, ['full-height']);
+    const chatHeader = createElement('div', { class: 'chat-header' });
+    chatHeader.innerHTML = '<h2>La Vida Chats</h2>';
+    const messages = createElement('div', { class: 'messages' });
+    const chatsHandler = createElement('div', { id: 'chatsHandler' });
+    messages.appendChild(chatsHandler);
+
+    const messageInput = createElement('div', { class: 'message-input' });
+    messageInput.innerHTML = `
+    <textarea placeholder="Type your message..." class="txt"></textarea>
+    <button id = "sendButton">Send</button>`;
+
+    chatWindow.appendChild(chatHeader);
+    chatWindow.appendChild(messages);
+    chatWindow.appendChild(messageInput);
+
+    chatContainer.appendChild(sidebar);
+    chatContainer.appendChild(chatWindow);
+
+    return chatContainer;
+}
+
+
+// export function createOvervieHTML() {
+//     let divContent: HTMLDivElement = document.createElement("div");
+//     let divUserCardsContainer: HTMLDivElement = document.createElement("div");
+//     let divUserCards: HTMLDivElement = document.createElement("div");
+
+//     let lavidalogo: HTMLImageElement = document.createElement("img");
+//     lavidalogo.src = "/logo/logo_transparent.png";
+
+//     let h2: HTMLHeadElement = document.createElement("h2");
+//     h2.innerHTML = "Active Users";
+
+
+
+//     divContent.id = "content";
+//     lavidalogo.id = "logo";
+//     divUserCardsContainer.id = "user-cards-container";
+//     divUserCards.id = "user-cards";
+
+//     divContent.appendChild(lavidalogo)
+//     divContent.appendChild(h2)
+//     divContent.appendChild(divUserCardsContainer);
+//     divUserCardsContainer.appendChild(divUserCards);
+//     document.body.appendChild(divContent);
+// }

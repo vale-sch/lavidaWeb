@@ -1,5 +1,5 @@
-import { onStartOverview } from "./Overview.js";
-import { cleanLogin, createOvervieHTML } from "./SiteChanger.js";
+import { onStartChatManager } from "./ChatManager.js";
+import { cleanLogin, createChatPage } from "./SiteChanger.js";
 import { connectClientID } from "./SocketConnection.js";
 import { User } from "./User.js";
 
@@ -10,8 +10,8 @@ let userLogin: HTMLInputElement = document.getElementById("loginUser") as HTMLIn
 let userPassword: HTMLInputElement = document.getElementById("loginPW") as HTMLInputElement;
 export let me: User;
 let eventOnEnter: any;
-let hasCleaned: boolean = false;
 onStartLogin();
+
 function onStartLogin() {
     addEvents();
 }
@@ -21,32 +21,37 @@ function onStartLogin() {
 async function addEvents(): Promise<void> {
     if (buttonDiv == null) return;
     await User.fetchUsers();
-    console.log("hasFetched");
     if (User.usersDB != null) {
-        buttonDiv.onclick = checkCredentials;
-        eventOnEnter = document.addEventListener('keydown', async (e) => {
+        buttonDiv.addEventListener("onclick", checkCredentials);
+        eventOnEnter = async (e: any) => {
             if ((e as KeyboardEvent).key === 'Enter') {
                 await checkCredentials();
             }
-        });
+        };
+        document.addEventListener('keydown', eventOnEnter);
+
     }
 }
-
 async function checkCredentials() {
-    if (!userLogin.value || !userPassword.value || hasCleaned) return;
-    User.usersDB.forEach((userDB: User) => {
+    let login: boolean = false;
+
+    if (!userLogin.value || !userPassword.value) return;
+    for (let userDB of User.usersDB) {
         if (userLogin.value == userDB.Name) {
             if (userPassword.value == userDB.Password) {
+                login = true;
                 me = userDB;
-                console.log(me);
+                break;
             }
         }
-    });
-    document.removeEventListener('keydown', eventOnEnter);
-    cleanLogin();
-    createOvervieHTML();
-    onStartOverview();
-    connectClientID(me.Id);
-
-    hasCleaned = true;
+    }
+    if (login) {
+        document.removeEventListener('keydown', eventOnEnter);
+        cleanLogin();
+        createChatPage();
+        connectClientID(me.Id);
+        onStartChatManager();
+    } else
+        alert("Wrong Username or Password, try again.");
 }
+

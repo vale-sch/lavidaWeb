@@ -7,47 +7,122 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { Chat } from "./Chat.js";
 import { ChatHistory } from "./ChatHistory.js";
 import { me } from "./Login.js";
-import { chatID, chatPartnerName } from "./Overview.js";
 import { socket } from "./SocketConnection.js";
+import { User } from "./User.js";
 let msgField;
 let chatsHandler;
 let sendButton;
-export let chatHistory;
+let activeUsers;
+let savedChats;
+let chatNameField;
+let chatHistory;
+let chatID;
+let chatPartnerName;
 let oldChatHistory;
 export function onStartChatManager() {
-    let chatNameField = document.getElementById("chatName");
-    sendButton = document.getElementsByClassName("fa-solid fa-paper-plane")[0];
-    msgField = document.getElementById("inputText");
+    chatNameField = document.getElementsByClassName("chat-header")[0];
     chatsHandler = document.getElementById("chatsHandler");
-    chatHistory = ChatHistory.createNew(chatID, me.Name);
-    oldChatHistory = ChatHistory.createNew(chatID, me.Name);
-    chatNameField.innerHTML = chatPartnerName;
-    sendButton.addEventListener("click", (e) => __awaiter(this, void 0, void 0, function* () {
-        if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
-            let msgToSend = msgField.innerText;
-            msgField.innerText = "";
-            yield sendMsg(me.Name, msgToSend);
+    sendButton = document.getElementById("sendButton");
+    msgField = document.getElementsByClassName("message-input")[0].getElementsByTagName("textarea")[0];
+    activeUsers = document.getElementById("activeUsers");
+    savedChats = document.getElementById("savedChats");
+    createPossibleChats();
+    sendButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
+        if (msgField.value.trim() !== "") {
+            let msgToSend = msgField.value;
+            msgField.value = "";
+            yield chatHistory.sendMsg(me.Name, msgToSend);
         }
     }));
     document.addEventListener('keydown', (e) => __awaiter(this, void 0, void 0, function* () {
         if (e.key === 'Enter') {
-            if (!chatID)
-                return;
-            if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
-                let msgToSend = msgField.innerText;
-                msgField.innerText = "";
-                yield sendMsg(me.Name, msgToSend);
+            if (msgField.value.trim() !== "") {
+                let msgToSend = msgField.value;
+                msgField.value = ""; // Clear the message field
+                e.preventDefault(); // Prevent the default behavior (line break)
+                yield chatHistory.sendMsg(me.Name, msgToSend);
             }
         }
     }));
-    //@ts-ignore
-    chatStream(chatHistory);
+}
+function createPossibleChats() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield User.fetchUsers();
+        User.usersDB.forEach((user) => {
+            let isSavedChat = false;
+            if (me.Name != user.Name) {
+                if (Object.keys(me.chats).length > 0) {
+                    Object.entries(me.chats).forEach(([chatID, participants]) => {
+                        //@ts-ignore
+                        if (participants.includes(me.Name)) {
+                            isSavedChat = true;
+                            let liElement = document.createElement("li");
+                            let profileImage = document.createElement("img");
+                            profileImage.src = "../../avatars/1.png";
+                            let nameOfChatPartner = document.createElement("span");
+                            nameOfChatPartner.innerHTML = user.Name;
+                            savedChats.appendChild(liElement);
+                            liElement.appendChild(profileImage);
+                            liElement.appendChild(nameOfChatPartner);
+                            makeSavedChatsInteractable(liElement, chatID);
+                        }
+                    });
+                }
+                if (!isSavedChat) {
+                    let liElement = document.createElement("li");
+                    let profileImage = document.createElement("img");
+                    profileImage.src = "../../avatars/1.png";
+                    let nameOfChatPartner = document.createElement("span");
+                    nameOfChatPartner.innerHTML = user.Name;
+                    activeUsers.appendChild(liElement);
+                    liElement.appendChild(profileImage);
+                    liElement.appendChild(nameOfChatPartner);
+                    makeActiveChatsInteractable(liElement, user);
+                }
+            }
+        });
+        //@ts-ignore
+    });
+}
+function makeActiveChatsInteractable(userLiElement, user) {
+    userLiElement.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        // Handle click event for the user card (e.g., redirect to chat page)
+        chatID = Math.floor((Date.now() + Math.random())).toString();
+        let participants = new Array;
+        participants.push(me.Name);
+        participants.push(user.Name);
+        chatHistory = ChatHistory.createNew(chatID, me.Name, participants);
+        oldChatHistory = chatHistory;
+        chatHistory.createChat();
+        chatPartnerName = user.Name;
+        chatNameField.innerHTML = user.Name;
+        socket.emit("startChat", chatID);
+        chatStream(chatHistory);
+        me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
+    }));
+}
+function makeSavedChatsInteractable(userLiElement, chatID) {
+    userLiElement.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        // Handle click event for the user card (e.g., redirect to chat page)
+        //@ts-ignore
+        chatHistory = yield ChatHistory.getChatHistory(chatID);
+        oldChatHistory = chatHistory;
+        console.log(chatHistory);
+        chatHistory.participants.forEach(participant => {
+            if (participant != me.Name)
+                chatNameField.innerHTML = participant;
+        });
+        socket.emit("startChat", chatHistory.chat_id);
+        chatStream(chatHistory);
+        me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
+    }));
 }
 export function handleReceiveMsg(senderID, message, timeSent) {
     let msg = document.createElement("p");
-    msg.className = "txt";
+    msg.className = "txtMsg";
     msg.innerText = message;
     if (chatPartnerName == senderID) {
         let receivedDiv = document.createElement("div");
@@ -80,7 +155,6 @@ export function handleReceiveMsg(senderID, message, timeSent) {
 function chatStream(chatHistory) {
     socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream) => {
         let chatHistoryTemp = JSON.parse(chatHistoryStream);
-        console.log(chatHistoryTemp);
         while (oldChatHistory.messages.length < chatHistoryTemp[0].messages.length) {
             let newMsg = chatHistory.messages[oldChatHistory.messages.length];
             oldChatHistory.messages.push(newMsg);
@@ -88,28 +162,3 @@ function chatStream(chatHistory) {
         }
     });
 }
-function sendMsg(senderID, message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        chatHistory.addMessage(senderID, message);
-        try {
-            let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(chatHistory),
-            });
-            if (response.status === 201) {
-                yield response.json();
-            }
-            else {
-                let data = yield response.json();
-                console.log(`Error: ${data.error}`);
-            }
-        }
-        catch (error) {
-            console.log(error);
-        }
-    });
-}
-//connectClient(me);

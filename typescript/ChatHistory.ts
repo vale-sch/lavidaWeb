@@ -1,6 +1,4 @@
-import { onStartChatManager } from "./ChatManager.js";
-import { createChatPage } from "./SiteChanger.js";
-import { UserCard } from "./UserCard.js";
+import { User } from "./User";
 
 export interface Message {
     sender_id: string;
@@ -10,27 +8,28 @@ export interface Message {
 
 export class ChatHistory {
     public chat_id: string;
+    public participants: string[];
     messages: Message[];
-    constructor(chat_id: string, messages: Message[]) {
+    constructor(chat_id: string, messages: Message[], participants: string[]) {
         this.chat_id = chat_id;
         this.messages = messages;
-
+        this.participants = participants;
     }
 
-    static createNew(chat_id: string, sender_id: string): ChatHistory {
+    static createNew(chat_id: string, sender_id: string, participants: string[]): ChatHistory {
         const newMessage: Message = {
             sender_id: sender_id,
             message: "",
             time_sent: "",
         };
 
-        return new ChatHistory(chat_id, [newMessage]);
+        return new ChatHistory(chat_id, [newMessage], participants);
     }
 
 
 
-    static fromDatabase(data: { chat_id: string; messages: Message[] }): ChatHistory {
-        return new ChatHistory(data.chat_id, data.messages);
+    static fromDatabase(data: { chat_id: string; messages: Message[], participants: string[] }): ChatHistory {
+        return new ChatHistory(data.chat_id, data.messages, data.participants);
     }
 
     addMessage(sender_id: string, message: string): void {
@@ -43,7 +42,7 @@ export class ChatHistory {
         this.messages.push(newMessage);
     }
 
-    static async getChatHistory(_chatID: string): Promise<ChatHistory | null> {
+    static async getChatHistory(_chatID: string): Promise<ChatHistory | string> {
         try {
             const response = await fetch(`https://lavida-server.vercel.app/api/receive_chat?chatID=${_chatID}`, {
                 method: 'GET',
@@ -64,12 +63,12 @@ export class ChatHistory {
             }
         } catch (error) {
             console.error(error);
-            return null;
+            return `Nothing fetched: ${error}`;
 
         }
     }
-    async sendMsg(chatID: string, senderID: string, message: string) {
-        this.addMessage(senderID, message)
+    async sendMsg(senderID: string, message: string) {
+        this.addMessage(senderID, message);
         try {
 
             let response = await fetch('https://lavida-server.vercel.app/api/send_msg', {
@@ -113,7 +112,7 @@ export class ChatHistory {
             console.log(error);
         }
     }
-    async createChat(_userCard: UserCard, _meUsername: string) {
+    async createChat() {
         try {
             let response = await fetch('https://lavida-server.vercel.app/api/create_chat', {
                 method: 'POST',
@@ -125,8 +124,6 @@ export class ChatHistory {
 
             if (response.status === 201) {
                 await response.text() as string;
-                createChatPage();
-                onStartChatManager();
 
             } else {
                 let data = await response.json();
