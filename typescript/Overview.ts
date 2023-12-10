@@ -1,32 +1,31 @@
 import { ChatHistory } from "./ChatHistory.js";
 import { InfoStream } from "./InfoStream.js";
+import { me } from "./Login.js";
 import { connectClientID, requestChatpartner, requestInfoObj, socket } from "./SocketConnection.js";
 import { User } from "./User.js";
 import { UserCard } from "./UserCard.js";
 
 
+export let chatID: string;
+export let chatPartnerName: string;
 
 
-const params = new URLSearchParams(window.location.search);
-let meUsername = params.get("user") as string;
-export let me: User;
+export function onStartOverview() {
+    buildUsers();
+    console.log(me.Name);
+}
+
 async function buildUsers(): Promise<void> {
     await User.fetchUsers();
     User.usersDB.forEach((user: User) => {
-        if (user.isActive && meUsername != user.Name) {
+        if (user.isActive && me.Name != user.Name) {
             createUserCard(user);
         }
-        if (meUsername == user.Name) {
-            me = user;
-            connectClientID(me.Id);
-            requestChatpartner(meUsername);
+        if (me.Name == user.Name) {
+            requestChatpartner(me.Name);
         }
     });
 }
-
-
-
-
 
 
 async function createUserCard(user: User): Promise<void> {
@@ -50,14 +49,14 @@ async function createUserCard(user: User): Promise<void> {
 
         userCardDiv.addEventListener('click', async () => {
             // Handle click event for the user card (e.g., redirect to chat page)
-            let chatID: string = Math.floor((Date.now() + Math.random())).toString();
+            chatID = Math.floor((Date.now() + Math.random())).toString();;
             let chatHistory: ChatHistory = ChatHistory.createNew(chatID, user.Name);
+            chatPartnerName = user.Name;
             //create a JSON Format for meUsername, chatID and userName and the whole URL 
             let infoStream: InfoStream = {
-                url: `chat_page.html?user=${meUsername}` + `&chatID=${chatID}` + `&me=${user.Name}`, // Replace with your URL
                 myUsername: user.Name,
                 chatID: chatID, // Replace with your chat ID
-                partnerUsername: meUsername,
+                partnerUsername: me.Name,
                 acceptedChatInvite: false
             };
 
@@ -74,14 +73,11 @@ async function createUserCard(user: User): Promise<void> {
                     console.log(time_out);
                 }, 20);
             });
-            chatHistory.createChat(userCard, meUsername);
-
+            chatHistory.createChat(userCard, me.Name);
 
         });
 
         userCardsContainer.appendChild(userCardDiv);
     }
 }
-
-buildUsers();
 

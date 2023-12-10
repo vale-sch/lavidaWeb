@@ -1,3 +1,5 @@
+import { onStartChatManager } from "./ChatManager.js";
+import { createChatPage } from "./SiteChanger.js";
 import { UserCard } from "./UserCard.js";
 
 export interface Message {
@@ -122,9 +124,10 @@ export class ChatHistory {
             });
 
             if (response.status === 201) {
-                let rspTxt: string = await response.text() as string;
-                console.log(rspTxt);
-                window.location.href = _userCard.href + `&chatID=${this.chat_id}` + `&me=${_meUsername}`;
+                await response.text() as string;
+                createChatPage();
+                onStartChatManager();
+
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);

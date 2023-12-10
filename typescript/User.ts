@@ -1,6 +1,6 @@
 export class User {
     public static usersDB: User[] = [];
-    public ioClinetID: string = "";
+    public ioClientID: string = "";
     public isActive: boolean = true;
 
     private name: string = "";

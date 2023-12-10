@@ -7,6 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { onStartChatManager } from "./ChatManager.js";
+import { createChatPage } from "./SiteChanger.js";
 export class ChatHistory {
     constructor(chat_id, messages) {
         this.chat_id = chat_id;
@@ -115,9 +117,9 @@ export class ChatHistory {
                     body: JSON.stringify(this),
                 });
                 if (response.status === 201) {
-                    let rspTxt = yield response.text();
-                    console.log(rspTxt);
-                    window.location.href = _userCard.href + `&chatID=${this.chat_id}` + `&me=${_meUsername}`;
+                    yield response.text();
+                    createChatPage();
+                    onStartChatManager();
                 }
                 else {
                     let data = yield response.json();

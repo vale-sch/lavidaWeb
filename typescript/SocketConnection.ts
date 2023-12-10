@@ -11,11 +11,14 @@ const socket: Socket = io("wss://lavidasocket.onrender.com");
 /*localOne
 */
 //@ts-ignore
-export const socket: Socket = io("ws://localhost:8080");
-export let requestInfoObj: InfoStream
+export let socket: Socket;
+export let requestInfoObj: InfoStream;
+
 
 
 export function connectClientID(userID: number): void {
+    //@ts-ignore
+    socket = io("ws://localhost:8080");
     socket.emit("onconnect", JSON.stringify(userID));
 }
 

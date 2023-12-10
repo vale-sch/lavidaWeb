@@ -8,58 +8,43 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { ChatHistory } from "./ChatHistory.js";
+import { me } from "./Login.js";
+import { chatID, chatPartnerName } from "./Overview.js";
 import { socket } from "./SocketConnection.js";
-const params = new URLSearchParams(window.location.search);
-let chatPartnerName = params.get("user");
-let chatID = params.get("chatID");
-let meUsername = params.get("me");
-document.getElementById("chatName").innerText = chatPartnerName;
-let msgField = document.getElementById("inputText");
-let chatsHandler = document.getElementById("chatsHandler");
-export let chatHistory = ChatHistory.createNew(chatID, meUsername);
-let oldChatHistory = ChatHistory.createNew(chatID, meUsername);
-function sendMsg(senderID, message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        chatHistory.addMessage(senderID, message);
-        try {
-            let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(chatHistory),
-            });
-            if (response.status === 201) {
-                yield response.json();
-            }
-            else {
-                let data = yield response.json();
-                console.log(`Error: ${data.error}`);
-            }
-        }
-        catch (error) {
-            console.log(error);
-        }
-    });
-}
-document.getElementsByClassName("fa-solid fa-paper-plane")[0].addEventListener("click", (e) => __awaiter(void 0, void 0, void 0, function* () {
-    if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
-        let msgToSend = msgField.innerText;
-        msgField.innerText = "";
-        yield sendMsg(meUsername, msgToSend);
-    }
-}));
-document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, function* () {
-    if (e.key === 'Enter') {
-        if (!chatID)
-            return;
+let msgField;
+let chatsHandler;
+let sendButton;
+export let chatHistory;
+let oldChatHistory;
+export function onStartChatManager() {
+    let chatNameField = document.getElementById("chatName");
+    sendButton = document.getElementsByClassName("fa-solid fa-paper-plane")[0];
+    msgField = document.getElementById("inputText");
+    chatsHandler = document.getElementById("chatsHandler");
+    chatHistory = ChatHistory.createNew(chatID, me.Name);
+    oldChatHistory = ChatHistory.createNew(chatID, me.Name);
+    chatNameField.innerHTML = chatPartnerName;
+    sendButton.addEventListener("click", (e) => __awaiter(this, void 0, void 0, function* () {
         if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
             let msgToSend = msgField.innerText;
             msgField.innerText = "";
-            yield sendMsg(meUsername, msgToSend);
+            yield sendMsg(me.Name, msgToSend);
         }
-    }
-}));
+    }));
+    document.addEventListener('keydown', (e) => __awaiter(this, void 0, void 0, function* () {
+        if (e.key === 'Enter') {
+            if (!chatID)
+                return;
+            if (msgField.innerText.replace(/[\r\n]/gm, '') != "") {
+                let msgToSend = msgField.innerText;
+                msgField.innerText = "";
+                yield sendMsg(me.Name, msgToSend);
+            }
+        }
+    }));
+    //@ts-ignore
+    chatStream(chatHistory);
+}
 export function handleReceiveMsg(senderID, message, timeSent) {
     let msg = document.createElement("p");
     msg.className = "txt";
@@ -93,8 +78,6 @@ export function handleReceiveMsg(senderID, message, timeSent) {
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
 function chatStream(chatHistory) {
-    let oldChatHistory = chatHistory;
-    console.log("JO");
     socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream) => {
         let chatHistoryTemp = JSON.parse(chatHistoryStream);
         console.log(chatHistoryTemp);
@@ -105,5 +88,28 @@ function chatStream(chatHistory) {
         }
     });
 }
+function sendMsg(senderID, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        chatHistory.addMessage(senderID, message);
+        try {
+            let response = yield fetch('https://lavida-server.vercel.app/api/send_msg', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(chatHistory),
+            });
+            if (response.status === 201) {
+                yield response.json();
+            }
+            else {
+                let data = yield response.json();
+                console.log(`Error: ${data.error}`);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    });
+}
 //connectClient(me);
-chatStream(chatHistory);

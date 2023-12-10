@@ -1,12 +1,15 @@
 import { User } from "./User.js";
 
 let buttonDiv: HTMLInputElement = document.getElementById("registration") as HTMLInputElement;
-buttonDiv.addEventListener("click", registrateMe);
-document.addEventListener('keydown', async (e) => {
-    if ((e as KeyboardEvent).key === 'Enter') {
-        registrateMe();
-    }
-});
+if (buttonDiv != null) {
+    buttonDiv.addEventListener("click", registrateMe);
+    document.addEventListener('keydown', async (e) => {
+        if ((e as KeyboardEvent).key === 'Enter') {
+            registrateMe();
+        }
+    });
+}
+
 
 function registrateMe(): void {
     let nameValue: string = (document.getElementById("name") as HTMLInputElement).value;

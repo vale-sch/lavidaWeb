@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 export class User {
     constructor(_id, _name, _password, _isActive) {
-        this.ioClinetID = "";
+        this.ioClientID = "";
         this.isActive = true;
         this.name = "";
         this.password = "";

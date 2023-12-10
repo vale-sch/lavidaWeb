@@ -8,23 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { ChatHistory } from "./ChatHistory.js";
-import { connectClientID, requestChatpartner, requestInfoObj, socket } from "./SocketConnection.js";
+import { me } from "./Login.js";
+import { requestChatpartner, requestInfoObj, socket } from "./SocketConnection.js";
 import { User } from "./User.js";
 import { UserCard } from "./UserCard.js";
-const params = new URLSearchParams(window.location.search);
-let meUsername = params.get("user");
-export let me;
+export let chatID;
+export let chatPartnerName;
+export function onStartOverview() {
+    buildUsers();
+    console.log(me.Name);
+}
 function buildUsers() {
     return __awaiter(this, void 0, void 0, function* () {
         yield User.fetchUsers();
         User.usersDB.forEach((user) => {
-            if (user.isActive && meUsername != user.Name) {
+            if (user.isActive && me.Name != user.Name) {
                 createUserCard(user);
             }
-            if (meUsername == user.Name) {
-                me = user;
-                connectClientID(me.Id);
-                requestChatpartner(meUsername);
+            if (me.Name == user.Name) {
+                requestChatpartner(me.Name);
             }
         });
     });
@@ -46,14 +48,15 @@ function createUserCard(user) {
             userCardDiv.appendChild(userName);
             userCardDiv.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 // Handle click event for the user card (e.g., redirect to chat page)
-                let chatID = Math.floor((Date.now() + Math.random())).toString();
+                chatID = Math.floor((Date.now() + Math.random())).toString();
+                ;
                 let chatHistory = ChatHistory.createNew(chatID, user.Name);
+                chatPartnerName = user.Name;
                 //create a JSON Format for meUsername, chatID and userName and the whole URL 
                 let infoStream = {
-                    url: `chat_page.html?user=${meUsername}` + `&chatID=${chatID}` + `&me=${user.Name}`,
                     myUsername: user.Name,
                     chatID: chatID,
-                    partnerUsername: meUsername,
+                    partnerUsername: me.Name,
                     acceptedChatInvite: false
                 };
                 socket.emit("infoStream", JSON.stringify(infoStream));
@@ -68,10 +71,9 @@ function createUserCard(user) {
                         console.log(time_out);
                     }, 20);
                 });
-                chatHistory.createChat(userCard, meUsername);
+                chatHistory.createChat(userCard, me.Name);
             }));
             userCardsContainer.appendChild(userCardDiv);
         }
     });
 }
-buildUsers();

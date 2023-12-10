@@ -9,12 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { User } from "./User.js";
 let buttonDiv = document.getElementById("registration");
-buttonDiv.addEventListener("click", registrateMe);
-document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, function* () {
-    if (e.key === 'Enter') {
-        registrateMe();
-    }
-}));
+if (buttonDiv != null) {
+    buttonDiv.addEventListener("click", registrateMe);
+    document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, function* () {
+        if (e.key === 'Enter') {
+            registrateMe();
+        }
+    }));
+}
 function registrateMe() {
     let nameValue = document.getElementById("name").value;
     let passwordValue = document.getElementById("password").value;

@@ -162,8 +162,8 @@ hr {
     height: fit-content;
     width: fit-content;
     bottom: -1vh;
-    height: 3%;
-    width: 75vw;
+    height: 5%;
+    width: 72vw;
     font-size: 2vh;
     border: 1px solid #ffffff00;
     background-color: #102230;
@@ -176,7 +176,7 @@ hr {
     position: absolute;
     float: right;
     bottom: 3vh;
-    left: 78.5vw;
+    left: 75vw;
     margin-top: 1%;
 
 }
