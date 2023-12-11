@@ -116,15 +116,18 @@ export class ChatHistory {
                     body: JSON.stringify(this),
                 });
                 if (response.status === 201) {
-                    yield response.text();
+                    let txt = yield response.text();
+                    return txt;
                 }
                 else {
                     let data = yield response.json();
                     console.log(`Error: ${data.error}`);
+                    return data.error;
                 }
             }
             catch (error) {
                 console.log(error);
+                return error;
             }
         });
     }

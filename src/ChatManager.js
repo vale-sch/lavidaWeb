@@ -20,8 +20,8 @@ let savedChats;
 let chatNameField;
 let chatHistory;
 let chatID;
-let chatPartnerName;
-let oldChatHistory;
+let displayedMessages;
+let currentlySelectedChat = null;
 export function onStartChatManager() {
     chatNameField = document.getElementsByClassName("chat-header")[0];
     chatsHandler = document.getElementById("chatsHandler");
@@ -50,81 +50,96 @@ export function onStartChatManager() {
 }
 function createPossibleChats() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield User.fetchUsers();
-        User.usersDB.forEach((user) => {
-            let isSavedChat = false;
-            if (me.Name != user.Name) {
-                if (Object.keys(me.chats).length > 0) {
-                    Object.entries(me.chats).forEach(([chatID, participants]) => {
-                        //@ts-ignore
-                        if (participants.includes(me.Name)) {
-                            isSavedChat = true;
-                            let liElement = document.createElement("li");
-                            let profileImage = document.createElement("img");
-                            profileImage.src = "../../avatars/1.png";
-                            let nameOfChatPartner = document.createElement("span");
-                            nameOfChatPartner.innerHTML = user.Name;
-                            savedChats.appendChild(liElement);
-                            liElement.appendChild(profileImage);
-                            liElement.appendChild(nameOfChatPartner);
-                            makeSavedChatsInteractable(liElement, chatID);
-                        }
-                    });
-                }
-                if (!isSavedChat) {
+        let savedChatsInfo = new Array();
+        if (Object.keys(me.chats).length > 0) {
+            Object.entries(me.chats).forEach(([chatID, participants]) => {
+                //@ts-ignore
+                if (participants.includes(me.Name)) {
+                    //@ts-ignore
+                    const partnerName = participants.find(name => name !== me.Name);
+                    savedChatsInfo.push(partnerName);
                     let liElement = document.createElement("li");
                     let profileImage = document.createElement("img");
                     profileImage.src = "../../avatars/1.png";
                     let nameOfChatPartner = document.createElement("span");
-                    nameOfChatPartner.innerHTML = user.Name;
-                    activeUsers.appendChild(liElement);
+                    nameOfChatPartner.innerHTML = partnerName;
+                    savedChats.appendChild(liElement);
                     liElement.appendChild(profileImage);
                     liElement.appendChild(nameOfChatPartner);
-                    makeActiveChatsInteractable(liElement, user);
+                    makeSavedChatsInteractable(liElement, chatID);
                 }
+            });
+        }
+        yield User.fetchUsers();
+        User.usersDB.forEach((user) => {
+            if (me.Name != user.Name && !savedChatsInfo.includes(user.Name)) {
+                let liElement = document.createElement("li");
+                let profileImage = document.createElement("img");
+                profileImage.src = "../../avatars/2.png";
+                let nameOfChatPartner = document.createElement("span");
+                nameOfChatPartner.innerHTML = user.Name;
+                activeUsers.appendChild(liElement);
+                liElement.appendChild(profileImage);
+                liElement.appendChild(nameOfChatPartner);
+                makeActiveChatsInteractable(liElement, user);
             }
         });
-        //@ts-ignore
     });
 }
 function makeActiveChatsInteractable(userLiElement, user) {
     userLiElement.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        if (currentlySelectedChat) {
+            currentlySelectedChat.classList.remove('highlight');
+        }
         // Handle click event for the user card (e.g., redirect to chat page)
         chatID = Math.floor((Date.now() + Math.random())).toString();
         let participants = new Array;
         participants.push(me.Name);
         participants.push(user.Name);
         chatHistory = ChatHistory.createNew(chatID, me.Name, participants);
-        oldChatHistory = chatHistory;
-        chatHistory.createChat();
-        chatPartnerName = user.Name;
+        yield chatHistory.createChat();
+        userLiElement.classList.add('highlight');
+        currentlySelectedChat = userLiElement;
+        displayedMessages = ChatHistory.createNew(chatHistory.chat_id, me.Name, chatHistory.participants);
         chatNameField.innerHTML = user.Name;
         socket.emit("startChat", chatID);
         chatStream(chatHistory);
-        me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
+        yield me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
+        yield me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.Id);
     }));
 }
 function makeSavedChatsInteractable(userLiElement, chatID) {
     userLiElement.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        if (currentlySelectedChat) {
+            currentlySelectedChat.classList.remove('highlight');
+        }
         // Handle click event for the user card (e.g., redirect to chat page)
         //@ts-ignore
         chatHistory = yield ChatHistory.getChatHistory(chatID);
-        oldChatHistory = chatHistory;
-        console.log(chatHistory);
+        if (displayedMessages != undefined) {
+            chatsHandler.innerHTML = "";
+        }
+        displayedMessages = ChatHistory.createNew(chatHistory.chat_id, me.Name, chatHistory.participants);
+        userLiElement.classList.add('highlight');
+        currentlySelectedChat = userLiElement;
+        while (displayedMessages.messages.length < chatHistory.messages.length) {
+            let newMsg = chatHistory.messages[displayedMessages.messages.length];
+            displayedMessages.messages.push(newMsg);
+            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        }
         chatHistory.participants.forEach(participant => {
             if (participant != me.Name)
                 chatNameField.innerHTML = participant;
         });
         socket.emit("startChat", chatHistory.chat_id);
         chatStream(chatHistory);
-        me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
     }));
 }
 export function handleReceiveMsg(senderID, message, timeSent) {
     let msg = document.createElement("p");
     msg.className = "txtMsg";
     msg.innerText = message;
-    if (chatPartnerName == senderID) {
+    if (me.Name != senderID) {
         let receivedDiv = document.createElement("div");
         receivedDiv.className = "messageDiv received";
         let imgPartner = document.createElement("img");
@@ -155,9 +170,9 @@ export function handleReceiveMsg(senderID, message, timeSent) {
 function chatStream(chatHistory) {
     socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream) => {
         let chatHistoryTemp = JSON.parse(chatHistoryStream);
-        while (oldChatHistory.messages.length < chatHistoryTemp[0].messages.length) {
-            let newMsg = chatHistory.messages[oldChatHistory.messages.length];
-            oldChatHistory.messages.push(newMsg);
+        while (displayedMessages.messages.length < chatHistoryTemp[0].messages.length) {
+            let newMsg = chatHistoryTemp[0].messages[displayedMessages.messages.length];
+            displayedMessages.messages.push(newMsg);
             handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
         }
     });

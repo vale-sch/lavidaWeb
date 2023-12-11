@@ -1,9 +1,17 @@
 /* Updated styles for chat interface */
+/* Define blue color variables */
+:root {
+    --primary-blue: #52658f;
+    --secondary-blue: #346a96;
+    --dark-blue: #1a354b;
+}
 
 .chat-container {
     display: flex;
     height: 98vh;
     width: 99vw;
+    border: 4px solid #ddd;
+    border-radius: 8px;
 }
 
 .sidebar {
@@ -60,7 +68,15 @@ h3 {
     border-radius: 50%;
     margin-right: 10px;
 }
-
+.highlight {
+    border: 4px  solid var(--dark-blue);
+    /* Your border color */
+    border-radius: 12px;
+    /* Additional styles for the border */
+    /* If you want to remove the background color */
+    background-color: transparent;
+    /* Ensure the background is transparent */
+}
 .chat-window {
     flex: 1;
     padding: 20px;
@@ -71,8 +87,8 @@ h3 {
 
 .chat-header {
     padding: 20px;
-    border-bottom: 2px solid #52658f;
-    font-size: 26px;
+    border-bottom: 5px solid var(--dark-blue);
+        font-size: 26px;
         font-weight: bolder;
     /* Highlight header */
 }
@@ -86,8 +102,7 @@ h3 {
 .messages {
     flex: 1;
     overflow-y: hidden;
-    padding-bottom: 20px;
-    height: 95%;
+    padding-bottom: 5px;
 }
 
 #chatsHandler {
@@ -123,8 +138,7 @@ h3 {
 /* Chat containers */
 .messageDiv {
     position: relative;
-    border: 4px solid #000000;
-    background-color: #346a96;
+    background-color: var(--secondary-blue);
     border-radius: 15px;
     width: fit-content;
     block-size: fit-content;
@@ -146,22 +160,19 @@ h3 {
 /* sent chat container */
 .received {
 
-    --_d: 0%;
-    border-left: var(--t) solid #ffffff00;
     margin-right: var(--t);
     place-self: start;
+    background-color: var(--primary-blue);
 }
 
 /* received chat container */
 .sent {
 
-    --_d: 100%;
-    border-right: var(--t) solid #ffffff00;
     margin-left: var(--t);
     place-self: end;
     margin-left: auto;
     margin-right: 0;
-    background-color: #1a354b;
+    background-color: var(--dark-blue);
 }
 
 /* Clear floats */
@@ -214,19 +225,25 @@ h3 {
 
 .message-input textarea {
     flex: 1;
-    padding: 10px;
-    margin-right: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    padding-top: 5px;
+    /* Reduce padding */
+    margin-right: 15px;
+    border-radius: 12px;
+    border: 3px solid #ddd;
     resize: none;
     overflow-y: hidden;
+    height: 50px;
+    /* Set specific height */
 }
 
 .message-input button {
-    padding: 10px 15px;
+    padding: 5px 15px;
+    /* Reduce padding */
     border: none;
     background-color: #007bff;
     color: white;
     cursor: pointer;
     border-radius: 8px;
+    height: 50px;
+    /* Set specific height */
 }

@@ -112,7 +112,7 @@ export class ChatHistory {
             console.log(error);
         }
     }
-    async createChat() {
+    async createChat(): Promise<string> {
         try {
             let response = await fetch('https://lavida-server.vercel.app/api/create_chat', {
                 method: 'POST',
@@ -123,14 +123,18 @@ export class ChatHistory {
             });
 
             if (response.status === 201) {
-                await response.text() as string;
-
+                let txt: string = await response.text() as string;
+                return txt;
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);
+                return data.error as string;
+
             }
         } catch (error) {
             console.log(error);
+            return error as string;
+
         }
     }
 }
