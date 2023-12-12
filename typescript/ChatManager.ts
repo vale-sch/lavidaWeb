@@ -56,7 +56,11 @@ export function onStartChatManager() {
         }
     });
 }
+// function checkOfFirstChat(){
+//     if(chatHistory.messages.length <= 1){
 
+//     }
+// }
 let activeChatListener = async function (userLiElement: HTMLLIElement, user: User) {
     if (currentlySelectedChat) {
         currentlySelectedChat.classList.remove('highlight');
@@ -68,6 +72,10 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     participants.push(user.Name);
     chatHistory = ChatHistory.createNew(chatID, me.Name, participants);
     await chatHistory.createChat();
+    userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
+    activeUsers.removeChild(userLiElement);
+    savedChats.appendChild(userLiElement);
+    userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
 
     userLiElement.classList.add('highlight');
     currentlySelectedChat = userLiElement;
@@ -86,10 +94,6 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     await me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
     await me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.Id);
 
-    userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
-    activeUsers.removeChild(userLiElement);
-    savedChats.appendChild(userLiElement);
-    userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
 
 
 };

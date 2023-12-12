@@ -48,6 +48,10 @@ export function onStartChatManager() {
         }
     }));
 }
+// function checkOfFirstChat(){
+//     if(chatHistory.messages.length <= 1){
+//     }
+// }
 let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
         if (currentlySelectedChat) {
@@ -60,6 +64,10 @@ let activeChatListener = function (userLiElement, user) {
         participants.push(user.Name);
         chatHistory = ChatHistory.createNew(chatID, me.Name, participants);
         yield chatHistory.createChat();
+        userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
+        activeUsers.removeChild(userLiElement);
+        savedChats.appendChild(userLiElement);
+        userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
         userLiElement.classList.add('highlight');
         currentlySelectedChat = userLiElement;
         if (displayedMessages != undefined) {
@@ -71,10 +79,6 @@ let activeChatListener = function (userLiElement, user) {
         chatStream(chatHistory);
         yield me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
         yield me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.Id);
-        userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
-        activeUsers.removeChild(userLiElement);
-        savedChats.appendChild(userLiElement);
-        userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
     });
 };
 let savedChatListener = function (userLiElement, chatID) {
