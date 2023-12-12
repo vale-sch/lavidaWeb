@@ -154,7 +154,7 @@ export function handleReceiveMsg(senderID, message, timeSent) {
         let receivedDiv = document.createElement("div");
         receivedDiv.className = "messageDiv received";
         let imgPartner = document.createElement("img");
-        imgPartner.src = "/avatars/2.png";
+        imgPartner.src = "../../avatars/2.png";
         let span = document.createElement("span");
         span.className = "time-left";
         span.innerHTML = timeSent;
@@ -167,7 +167,7 @@ export function handleReceiveMsg(senderID, message, timeSent) {
         let sentDiv = document.createElement("div");
         sentDiv.className = "messageDiv sent";
         let imgMe = document.createElement("img");
-        imgMe.src = "/avatars/1.png";
+        imgMe.src = "../../avatars/1.png";
         let span = document.createElement("span");
         span.className = "time-right";
         span.innerHTML = timeSent;

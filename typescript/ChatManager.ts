@@ -186,7 +186,7 @@ export function handleReceiveMsg(senderID: string, message: string, timeSent: st
         receivedDiv.className = "messageDiv received"
 
         let imgPartner: HTMLImageElement = document.createElement("img");
-        imgPartner.src = "/avatars/2.png";
+        imgPartner.src = "../../avatars/2.png";
 
         let span: HTMLSpanElement = document.createElement("span");
         span.className = "time-left";
@@ -201,7 +201,7 @@ export function handleReceiveMsg(senderID: string, message: string, timeSent: st
         sentDiv.className = "messageDiv sent"
 
         let imgMe: HTMLImageElement = document.createElement("img");
-        imgMe.src = "/avatars/1.png";
+        imgMe.src = "../../avatars/1.png";
 
         let span: HTMLSpanElement = document.createElement("span");
         span.className = "time-right";
