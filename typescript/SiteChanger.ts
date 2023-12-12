@@ -80,29 +80,3 @@ function generateChatContainer(): HTMLElement {
 
     return chatContainer;
 }
-
-
-// export function createOvervieHTML() {
-//     let divContent: HTMLDivElement = document.createElement("div");
-//     let divUserCardsContainer: HTMLDivElement = document.createElement("div");
-//     let divUserCards: HTMLDivElement = document.createElement("div");
-
-//     let lavidalogo: HTMLImageElement = document.createElement("img");
-//     lavidalogo.src = "/logo/logo_transparent.png";
-
-//     let h2: HTMLHeadElement = document.createElement("h2");
-//     h2.innerHTML = "Active Users";
-
-
-
-//     divContent.id = "content";
-//     lavidalogo.id = "logo";
-//     divUserCardsContainer.id = "user-cards-container";
-//     divUserCards.id = "user-cards";
-
-//     divContent.appendChild(lavidalogo)
-//     divContent.appendChild(h2)
-//     divContent.appendChild(divUserCardsContainer);
-//     divUserCardsContainer.appendChild(divUserCards);
-//     document.body.appendChild(divContent);
-// }

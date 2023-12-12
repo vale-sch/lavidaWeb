@@ -29,7 +29,7 @@ export function onStartChatManager() {
     msgField = document.getElementsByClassName("message-input")[0].getElementsByTagName("textarea")[0];
     activeUsers = document.getElementById("activeUsers");
     savedChats = document.getElementById("savedChats");
-    createPossibleChats();
+    generateAllPossibleChats();
     sendButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
         if (msgField.value.trim() !== "") {
             let msgToSend = msgField.value;
@@ -48,46 +48,8 @@ export function onStartChatManager() {
         }
     }));
 }
-function createPossibleChats() {
+let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
-        let savedChatsInfo = new Array();
-        if (Object.keys(me.chats).length > 0) {
-            Object.entries(me.chats).forEach(([chatID, participants]) => {
-                //@ts-ignore
-                if (participants.includes(me.Name)) {
-                    //@ts-ignore
-                    const partnerName = participants.find(name => name !== me.Name);
-                    savedChatsInfo.push(partnerName);
-                    let liElement = document.createElement("li");
-                    let profileImage = document.createElement("img");
-                    profileImage.src = "../../avatars/1.png";
-                    let nameOfChatPartner = document.createElement("span");
-                    nameOfChatPartner.innerHTML = partnerName;
-                    savedChats.appendChild(liElement);
-                    liElement.appendChild(profileImage);
-                    liElement.appendChild(nameOfChatPartner);
-                    makeSavedChatsInteractable(liElement, chatID);
-                }
-            });
-        }
-        yield User.fetchUsers();
-        User.usersDB.forEach((user) => {
-            if (me.Name != user.Name && !savedChatsInfo.includes(user.Name)) {
-                let liElement = document.createElement("li");
-                let profileImage = document.createElement("img");
-                profileImage.src = "../../avatars/2.png";
-                let nameOfChatPartner = document.createElement("span");
-                nameOfChatPartner.innerHTML = user.Name;
-                activeUsers.appendChild(liElement);
-                liElement.appendChild(profileImage);
-                liElement.appendChild(nameOfChatPartner);
-                makeActiveChatsInteractable(liElement, user);
-            }
-        });
-    });
-}
-function makeActiveChatsInteractable(userLiElement, user) {
-    userLiElement.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
         if (currentlySelectedChat) {
             currentlySelectedChat.classList.remove('highlight');
         }
@@ -100,16 +62,23 @@ function makeActiveChatsInteractable(userLiElement, user) {
         yield chatHistory.createChat();
         userLiElement.classList.add('highlight');
         currentlySelectedChat = userLiElement;
+        if (displayedMessages != undefined) {
+            chatsHandler.innerHTML = "";
+        }
         displayedMessages = ChatHistory.createNew(chatHistory.chat_id, me.Name, chatHistory.participants);
         chatNameField.innerHTML = user.Name;
         socket.emit("startChat", chatID);
         chatStream(chatHistory);
         yield me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), me.Id);
         yield me.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.Id);
-    }));
-}
-function makeSavedChatsInteractable(userLiElement, chatID) {
-    userLiElement.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
+        activeUsers.removeChild(userLiElement);
+        savedChats.appendChild(userLiElement);
+        userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
+    });
+};
+let savedChatListener = function (userLiElement, chatID) {
+    return __awaiter(this, void 0, void 0, function* () {
         if (currentlySelectedChat) {
             currentlySelectedChat.classList.remove('highlight');
         }
@@ -133,7 +102,45 @@ function makeSavedChatsInteractable(userLiElement, chatID) {
         });
         socket.emit("startChat", chatHistory.chat_id);
         chatStream(chatHistory);
-    }));
+    });
+};
+function generateAllPossibleChats() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let savedChatsInfo = new Array();
+        if (Object.keys(me.chats).length > 0) {
+            Object.entries(me.chats).forEach(([chatID, participants]) => {
+                //@ts-ignore
+                if (participants.includes(me.Name)) {
+                    //@ts-ignore
+                    const partnerName = participants.find(name => name !== me.Name);
+                    savedChatsInfo.push(partnerName);
+                    let liElement = document.createElement("li");
+                    let profileImage = document.createElement("img");
+                    profileImage.src = "../../avatars/1.png";
+                    let nameOfChatPartner = document.createElement("span");
+                    nameOfChatPartner.innerHTML = partnerName;
+                    savedChats.appendChild(liElement);
+                    liElement.appendChild(profileImage);
+                    liElement.appendChild(nameOfChatPartner);
+                    liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
+                }
+            });
+        }
+        yield User.fetchUsers();
+        User.usersDB.forEach((user) => {
+            if (me.Name != user.Name && !savedChatsInfo.includes(user.Name)) {
+                let liElement = document.createElement("li");
+                let profileImage = document.createElement("img");
+                profileImage.src = "../../avatars/2.png";
+                let nameOfChatPartner = document.createElement("span");
+                nameOfChatPartner.innerHTML = user.Name;
+                activeUsers.appendChild(liElement);
+                liElement.appendChild(profileImage);
+                liElement.appendChild(nameOfChatPartner);
+                liElement.addEventListener('click', () => activeChatListener(liElement, user));
+            }
+        });
+    });
 }
 export function handleReceiveMsg(senderID, message, timeSent) {
     let msg = document.createElement("p");
@@ -168,6 +175,7 @@ export function handleReceiveMsg(senderID, message, timeSent) {
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
 function chatStream(chatHistory) {
+    console.log(`chat=${chatHistory.chat_id}`);
     socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream) => {
         let chatHistoryTemp = JSON.parse(chatHistoryStream);
         while (displayedMessages.messages.length < chatHistoryTemp[0].messages.length) {
