@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { Chat } from "./Chat.js";
+import { ChatElement } from "./ChatElement.js";
 import { ChatHistory } from "./ChatHistory.js";
 import { socket } from "./SocketConnection.js";
 import { User } from "./User.js";
@@ -16,12 +17,14 @@ let chatsHandler;
 let sendButton;
 let activeUsers;
 let savedChats;
+let chatElements = new Array();
 let chatNameField;
 let chatHistory;
-let chatID;
 let displayedMessages;
 let currentlySelectedChat = null;
-let activeChatListeners = new Array();
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 export function onStartChatManager() {
     chatNameField = document.getElementsByClassName("chat-header")[0];
     chatsHandler = document.getElementById("chatsHandler");
@@ -67,16 +70,40 @@ export function onStartChatManager() {
             liElement.appendChild(profileImage);
             liElement.appendChild(nameOfChatPartner);
             liElement.addEventListener('click', () => activeChatListener(liElement, user));
-            activeChatListeners.push(liElement);
+            let chatElement = new ChatElement(liElement, user.name);
+            chatElements.push(chatElement);
         }
         yield User.fetchUsers();
+    }));
+    socket.on(`${User.me.name}`, (chatRequestUser) => __awaiter(this, void 0, void 0, function* () {
+        chatElements.forEach((chatElement) => __awaiter(this, void 0, void 0, function* () {
+            if (chatElement.name == chatRequestUser) {
+                let userToFind = User.usersDB.find(user => user.name == chatRequestUser);
+                if (userToFind) {
+                    chatElement.HTMLLIElement.removeEventListener('click', () => activeChatListener(chatElement.HTMLLIElement, userToFind));
+                }
+                activeUsers.removeChild(chatElement.HTMLLIElement);
+                savedChats.appendChild(chatElement.HTMLLIElement);
+                User.updateMe();
+                yield delay(500);
+                User.updateMe();
+                yield delay(500);
+                User.updateMe();
+                if (Object.keys(User.me.chats).length > 0) {
+                    Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+                        //@ts-ignore
+                        if (participants.includes(userToFind.name)) {
+                            chatElement.HTMLLIElement.addEventListener('click', () => savedChatListener(chatElement.HTMLLIElement, chatID));
+                        }
+                    });
+                }
+            }
+        }));
     }));
 }
 let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!activeUsers.contains(userLiElement)) {
-            userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
-            userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
             return;
         }
         if (currentlySelectedChat) {
@@ -99,7 +126,7 @@ let activeChatListener = function (userLiElement, user) {
         if (isAlreadyChatting)
             return;
         // Handle click event for the user card (e.g., redirect to chat page)
-        chatID = Math.floor((Date.now() + Math.random())).toString();
+        let chatID = Math.floor((Date.now() + Math.random())).toString();
         let participants = new Array;
         participants.push(User.me.name);
         participants.push(user.name);
@@ -117,7 +144,12 @@ let activeChatListener = function (userLiElement, user) {
         displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants);
         chatNameField.innerHTML = user.name;
         socket.emit("startChat", chatID);
+        let usersInfo = new Array();
+        usersInfo.push(User.me.name);
+        usersInfo.push(user.name);
+        socket.emit("newChatRequest", usersInfo);
         chatStream(chatHistory);
+        console.log(User.me.id, user.id);
         yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), User.me.id);
         yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.id);
     });
@@ -183,7 +215,8 @@ function generateAllPossibleChats() {
                 liElement.appendChild(profileImage);
                 liElement.appendChild(nameOfChatPartner);
                 liElement.addEventListener('click', () => activeChatListener(liElement, user));
-                activeChatListeners.push(liElement);
+                let chatElement = new ChatElement(liElement, user.name);
+                chatElements.push(chatElement);
             }
         });
     });
