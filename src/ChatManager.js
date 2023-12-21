@@ -221,13 +221,8 @@ export function handleReceiveMsg(senderID, message, timeSent) {
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
 function chatStream(chatHistory) {
-    socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream) => {
-        let chatHistoryTemp = JSON.parse(chatHistoryStream);
-        console.log(chatHistoryTemp[0].messages.length);
-        while (displayedMessages.messages.length < chatHistoryTemp[0].messages.length) {
-            let newMsg = chatHistoryTemp[0].messages[displayedMessages.messages.length];
-            displayedMessages.messages.push(newMsg);
-            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
-        }
+    socket.on(`chat=${chatHistory.chat_id}`, (newMsgStream) => {
+        let newMsg = JSON.parse(newMsgStream);
+        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     });
 }

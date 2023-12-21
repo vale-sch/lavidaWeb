@@ -33,7 +33,6 @@ async function addEvents(): Promise<void> {
 }
 async function checkCredentials() {
     let login: boolean = false;
-    console.log("checkCredentials");
     if (!userLogin.value || !userPassword.value) return;
     for (let userDB of User.usersDB) {
         if (userLogin.value == userDB.name) {

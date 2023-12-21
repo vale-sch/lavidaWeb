@@ -38,7 +38,6 @@ function addEvents() {
 function checkCredentials() {
     return __awaiter(this, void 0, void 0, function* () {
         let login = false;
-        console.log("checkCredentials");
         if (!userLogin.value || !userPassword.value)
             return;
         for (let userDB of User.usersDB) {

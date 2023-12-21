@@ -248,14 +248,10 @@ export function handleReceiveMsg(senderID: string, message: string, timeSent: st
 }
 
 function chatStream(chatHistory: ChatHistory): void {
-    socket.on(`chat=${chatHistory.chat_id}`, (chatHistoryStream: string) => {
-        let chatHistoryTemp = JSON.parse(chatHistoryStream);
-        console.log(chatHistoryTemp[0].messages.length);
-        while (displayedMessages.messages.length < chatHistoryTemp[0].messages.length) {
-            let newMsg: Message = chatHistoryTemp[0].messages[displayedMessages.messages.length];
-            displayedMessages.messages.push(newMsg);
-            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
-        }
+    socket.on(`chat=${chatHistory.chat_id}`, (newMsgStream: string) => {
+        let newMsg: Message = JSON.parse(newMsgStream);
+        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+
     });
 }
 
