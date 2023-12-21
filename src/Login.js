@@ -11,10 +11,9 @@ import { onStartChatManager } from "./ChatManager.js";
 import { cleanLogin, createChatPage } from "./SiteChanger.js";
 import { connectClientID } from "./SocketConnection.js";
 import { User } from "./User.js";
-let buttonDiv = document.getElementById("loginBtn");
+let buttonInput = document.getElementById("loginBtn");
 let userLogin = document.getElementById("loginUser");
 let userPassword = document.getElementById("loginPW");
-export let me;
 let eventOnEnter;
 onStartLogin();
 function onStartLogin() {
@@ -22,16 +21,16 @@ function onStartLogin() {
 }
 function addEvents() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (buttonDiv == null)
+        if (buttonInput == null)
             return;
         yield User.fetchUsers();
         if (User.usersDB != null) {
-            buttonDiv.addEventListener("onclick", checkCredentials);
             eventOnEnter = (e) => __awaiter(this, void 0, void 0, function* () {
                 if (e.key === 'Enter') {
                     yield checkCredentials();
                 }
             });
+            buttonInput.addEventListener("click", checkCredentials);
             document.addEventListener('keydown', eventOnEnter);
         }
     });
@@ -39,13 +38,14 @@ function addEvents() {
 function checkCredentials() {
     return __awaiter(this, void 0, void 0, function* () {
         let login = false;
+        console.log("checkCredentials");
         if (!userLogin.value || !userPassword.value)
             return;
         for (let userDB of User.usersDB) {
-            if (userLogin.value == userDB.Name) {
-                if (userPassword.value == userDB.Password) {
+            if (userLogin.value == userDB.name) {
+                if (userPassword.value == userDB.password) {
                     login = true;
-                    me = userDB;
+                    User.me = userDB;
                     break;
                 }
             }
@@ -54,7 +54,7 @@ function checkCredentials() {
             document.removeEventListener('keydown', eventOnEnter);
             cleanLogin();
             createChatPage();
-            connectClientID(me.Id);
+            connectClientID(User.me.id);
             onStartChatManager();
         }
         else

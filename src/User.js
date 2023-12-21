@@ -19,16 +19,7 @@ export class User {
         this.isActive = _isActive;
         this.chats = chats;
     }
-    get Id() {
-        return this.id;
-    }
-    get Name() {
-        return this.name;
-    }
-    get Password() {
-        return this.password;
-    }
-    updateChatsInUser(chat, userID) {
+    static updateChatsInUser(chat, userID) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let response = yield fetch('https://lavida-server.vercel.app/api/push_chat_to_user', {
@@ -39,8 +30,7 @@ export class User {
                     body: JSON.stringify({ chat, userID }),
                 });
                 if (response.status === 200) {
-                    let responseJSON = yield response.json();
-                    console.log(responseJSON);
+                    yield response.json();
                 }
                 else {
                     let data = yield response.json();
@@ -70,6 +60,30 @@ export class User {
                 else {
                     let data = yield response.json();
                     console.log(`Error: ${data.error}`);
+                }
+            }
+            catch (error) {
+                console.error('Error creating user:', error);
+            }
+        });
+    }
+    static updateMe() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const id = User.me.id;
+            try {
+                let response = yield fetch('https://lavida-server.vercel.app/api/get_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id }), // Wrap the id in an object
+                });
+                if (response.status === 201) {
+                    let me = yield response.json();
+                    User.me = me;
+                }
+                else {
+                    yield response.json();
                 }
             }
             catch (error) {

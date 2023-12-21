@@ -4,11 +4,10 @@ import { connectClientID } from "./SocketConnection.js";
 import { User } from "./User.js";
 
 
-let buttonDiv: HTMLInputElement = document.getElementById("loginBtn") as HTMLInputElement;
+let buttonInput: HTMLInputElement = document.getElementById("loginBtn") as HTMLInputElement;
 
 let userLogin: HTMLInputElement = document.getElementById("loginUser") as HTMLInputElement;
 let userPassword: HTMLInputElement = document.getElementById("loginPW") as HTMLInputElement;
-export let me: User;
 let eventOnEnter: any;
 onStartLogin();
 
@@ -19,28 +18,28 @@ function onStartLogin() {
 
 
 async function addEvents(): Promise<void> {
-    if (buttonDiv == null) return;
+    if (buttonInput == null) return;
     await User.fetchUsers();
     if (User.usersDB != null) {
-        buttonDiv.addEventListener("onclick", checkCredentials);
         eventOnEnter = async (e: any) => {
             if ((e as KeyboardEvent).key === 'Enter') {
                 await checkCredentials();
             }
         };
+        buttonInput.addEventListener("click", checkCredentials);
         document.addEventListener('keydown', eventOnEnter);
 
     }
 }
 async function checkCredentials() {
     let login: boolean = false;
-
+    console.log("checkCredentials");
     if (!userLogin.value || !userPassword.value) return;
     for (let userDB of User.usersDB) {
-        if (userLogin.value == userDB.Name) {
-            if (userPassword.value == userDB.Password) {
+        if (userLogin.value == userDB.name) {
+            if (userPassword.value == userDB.password) {
                 login = true;
-                me = userDB;
+                User.me = userDB;
                 break;
             }
         }
@@ -49,7 +48,7 @@ async function checkCredentials() {
         document.removeEventListener('keydown', eventOnEnter);
         cleanLogin();
         createChatPage();
-        connectClientID(me.Id);
+        connectClientID(User.me.id);
         onStartChatManager();
     } else
         alert("Wrong Username or Password, try again.");

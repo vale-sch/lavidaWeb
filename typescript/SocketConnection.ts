@@ -4,7 +4,7 @@ import { InfoStream } from "./InfoStream";
 
 /*
 deployed one
-const socket: Socket = io("ws://lcoalhost:8000");
+const socket: Socket = io("ws://localhost:8080");
 */
 
 //@ts-ignore
