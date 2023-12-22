@@ -103,7 +103,7 @@ export function onStartChatManager() {
 }
 let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!activeUsers.contains(userLiElement)) {
+        if (!savedChats.contains(userLiElement)) {
             return;
         }
         if (currentlySelectedChat) {
@@ -143,12 +143,12 @@ let activeChatListener = function (userLiElement, user) {
         }
         displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants);
         chatNameField.innerHTML = user.name;
-        socket.emit("startChat", chatID);
+        socket.emit("startChat", chatID, User.me.id);
         let usersInfo = new Array();
         usersInfo.push(User.me.name);
         usersInfo.push(user.name);
         socket.emit("newChatRequest", usersInfo);
-        chatStream(chatHistory);
+        chatStream(chatHistory.chat_id);
         console.log(User.me.id, user.id);
         yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), User.me.id);
         yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.id);
@@ -173,12 +173,12 @@ let savedChatListener = function (userLiElement, chatID) {
             displayedMessages.messages.push(newMsg);
             handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
         }
-        chatHistory.participants.forEach(participant => {
+        chatHistory.participants.find(participant => {
             if (participant != User.me.name)
                 chatNameField.innerHTML = participant;
         });
-        socket.emit("startChat", chatHistory.chat_id);
-        chatStream(chatHistory);
+        socket.emit("startChat", chatHistory.chat_id, User.me.id);
+        chatStream(chatHistory.chat_id);
     });
 };
 function generateAllPossibleChats() {
@@ -253,9 +253,16 @@ export function handleReceiveMsg(senderID, message, timeSent) {
     }
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
-function chatStream(chatHistory) {
-    socket.on(`chat=${chatHistory.chat_id}`, (newMsgStream) => {
+let oldChatID = "";
+function chatStream(chatID) {
+    const chatListener = (newMsgStream) => {
         let newMsg = JSON.parse(newMsgStream);
         handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
-    });
+    };
+    // Add the event listener
+    socket.on(`chat=${chatID}`, chatListener);
+    // Later, to remove the specific listener
+    if (oldChatID != "")
+        socket.off(`chat=${oldChatID}`, chatListener);
+    oldChatID = chatID;
 }
