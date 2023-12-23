@@ -13,6 +13,8 @@ let chatsHandler: HTMLDivElement;
 let sendButton: HTMLButtonElement
 let activeUsers: HTMLUListElement;
 let savedChats: HTMLUListElement;
+let requestChats: HTMLUListElement;
+
 let chatElements: Array<ChatElement> = new Array<ChatElement>();
 let chatNameField: HTMLHeadElement;
 
@@ -32,7 +34,7 @@ export function onStartChatManager() {
 
     activeUsers = <HTMLUListElement>document.getElementById("activeUsers");
     savedChats = <HTMLUListElement>document.getElementById("savedChats");
-
+    requestChats = <HTMLUListElement>document.getElementById("requestChats");
     socket.emit("newChatPartner", User.me);
     generateAllPossibleChats();
 
@@ -108,7 +110,8 @@ export function onStartChatManager() {
 }
 
 let activeChatListener = async function (userLiElement: HTMLLIElement, user: User) {
-    if (!savedChats.contains(userLiElement)) {
+
+    if (savedChats.contains(userLiElement)) {
         return;
     }
 
@@ -119,9 +122,9 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     let isAlreadyChatting: boolean = false;
 
     if (Object.keys(User.me.chats).length > 0) {
-        Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+        Object.entries(User.me.chats).forEach(([chatID, chat]) => {
             //@ts-ignore
-            if (participants.includes(user.name)) {
+            if (chat.participants.includes(user.name)) {
                 userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
                 activeUsers.removeChild(userLiElement);
                 savedChats.appendChild(userLiElement);
@@ -131,6 +134,7 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
         });
     }
     if (isAlreadyChatting) return;
+
     // Handle click event for the user card (e.g., redirect to chat page)
     let chatID = Math.floor((Date.now() + Math.random())).toString();
     let participants: string[] = new Array<string>;
@@ -151,16 +155,15 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     }
 
     displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants); chatNameField.innerHTML = user.name;
-    socket.emit("startChat", chatID, User.me.id);
     let usersInfo: string[] = new Array<string>();
     usersInfo.push(User.me.name);
     usersInfo.push(user.name);
+    socket.emit("startChat", chatID, User.me.id);
     socket.emit("newChatRequest", usersInfo);
 
     chatStream(chatHistory.chat_id);
-    console.log(User.me.id, user.id);
-    await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), User.me.id);
-    await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.id);
+    await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, false), User.me.id);
+    await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, true), user.id);
 };
 
 let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: string) {
@@ -194,34 +197,91 @@ let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: st
     chatStream(chatHistory.chat_id);
 };
 
+let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID: string, chat: Chat, user: User) {
+    if (currentlySelectedChat) {
+        currentlySelectedChat.classList.remove('highlight');
+    }
+    if (savedChats.contains(userLiElement)) {
+        return;
+    }
+    // Handle click event for the user card (e.g., redirect to chat page)
+    //@ts-ignore
+    chatHistory = await ChatHistory.getChatHistory(chatID);
+    if (displayedMessages != undefined) {
+        chatsHandler.innerHTML = "";
+    }
 
+    displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants);
+
+    userLiElement.classList.add('highlight');
+    currentlySelectedChat = userLiElement;
+
+    while (displayedMessages.messages.length < chatHistory.messages.length) {
+        let newMsg: Message = chatHistory.messages[displayedMessages.messages.length];
+        displayedMessages.messages.push(newMsg);
+        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+    }
+
+    userLiElement.removeEventListener('click', () => requestedChatListener(userLiElement, chatID, chat, user));
+    requestChats.removeChild(userLiElement);
+
+    savedChats.appendChild(userLiElement);
+    userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
+
+    chatHistory.participants.find(participant => {
+        if (participant != User.me.name)
+            chatNameField.innerHTML = participant;
+
+    })
+    socket.emit("startChat", chatHistory.chat_id, User.me.id);
+    chatStream(chatHistory.chat_id);
+    chat.isAccepted = true;
+    chat.isRequested = false;
+    await User.updateChatsInUser(chat, User.me.id);
+    await User.updateChatsInUser(chat, user.id);
+};
 
 
 
 async function generateAllPossibleChats(): Promise<void> {
-    let savedChatsInfo: string[] = new Array<string>();
+    let activeChats: string[] = new Array<string>();
+    await User.fetchUsers();
+
     if (Object.keys(User.me.chats).length > 0) {
-        Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+        Object.entries(User.me.chats).forEach(([chatID, chat]) => {
             //@ts-ignore
-            if (participants.includes(User.me.name)) {
-                //@ts-ignore
-                const partnerName = participants.find(name => name !== User.me.name);
-                savedChatsInfo.push(partnerName);
+            if (chat.participants.includes(User.me.name)) {
+                const partnerName = chat.participants.find(name => name !== User.me.name);
+                activeChats.push(partnerName ?? '');
+
                 let liElement: HTMLLIElement = document.createElement("li");
                 let profileImage: HTMLImageElement = document.createElement("img");
-                profileImage.src = "../../avatars/1.png"
+                profileImage.src = "../../avatars/2.png"
                 let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
-                nameOfChatPartner.innerHTML = partnerName;
-                savedChats.appendChild(liElement);
-                liElement.appendChild(profileImage);
-                liElement.appendChild(nameOfChatPartner);
-                liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
+                //@ts-ignore
+                if (User.me.chats[chatID].isRequested) {
+                    nameOfChatPartner.innerHTML = partnerName ?? '';
+                    requestChats.appendChild(liElement);
+                    liElement.appendChild(profileImage);
+                    liElement.appendChild(nameOfChatPartner);
+                    User.usersDB.find(user => {
+                        if (user.name == partnerName) {
+                            liElement.addEventListener('click', () => requestedChatListener(liElement, chatID, chat, user));
+                        }
+                    });
+                } else {
+
+                    nameOfChatPartner.innerHTML = partnerName ?? '';
+                    savedChats.appendChild(liElement);
+                    liElement.appendChild(profileImage);
+                    liElement.appendChild(nameOfChatPartner);
+                    liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
+                }
             }
         });
     }
-    await User.fetchUsers();
     User.usersDB.forEach((user: User) => {
-        if (User.me.name != user.name && !savedChatsInfo.includes(user.name)) {
+        if (User.me.name != user.name && !activeChats.includes(user.name)) {
             let liElement: HTMLLIElement = document.createElement("li");
             let profileImage: HTMLImageElement = document.createElement("img");
             profileImage.src = "../../avatars/2.png"
@@ -231,7 +291,6 @@ async function generateAllPossibleChats(): Promise<void> {
             liElement.appendChild(profileImage);
             liElement.appendChild(nameOfChatPartner);
             liElement.addEventListener('click', () => activeChatListener(liElement, user));
-
             let chatElement: ChatElement = new ChatElement(liElement, user.name);
             chatElements.push(chatElement);
         }
@@ -281,8 +340,10 @@ export function handleReceiveMsg(senderID: string, message: string, timeSent: st
 }
 let oldChatID: string = "";
 function chatStream(chatID: string): void {
+    console.log(`chat=${chatID}` + " " + `chat=${oldChatID}`)
     const chatListener = (newMsgStream: string) => {
         let newMsg: Message = JSON.parse(newMsgStream);
+        console.log(newMsg);
         handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
     // Add the event listener

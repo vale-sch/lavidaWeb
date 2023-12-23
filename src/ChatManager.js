@@ -17,6 +17,7 @@ let chatsHandler;
 let sendButton;
 let activeUsers;
 let savedChats;
+let requestChats;
 let chatElements = new Array();
 let chatNameField;
 let chatHistory;
@@ -32,6 +33,7 @@ export function onStartChatManager() {
     msgField = document.getElementsByClassName("message-input")[0].getElementsByTagName("textarea")[0];
     activeUsers = document.getElementById("activeUsers");
     savedChats = document.getElementById("savedChats");
+    requestChats = document.getElementById("requestChats");
     socket.emit("newChatPartner", User.me);
     generateAllPossibleChats();
     sendButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
@@ -103,7 +105,7 @@ export function onStartChatManager() {
 }
 let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!savedChats.contains(userLiElement)) {
+        if (savedChats.contains(userLiElement)) {
             return;
         }
         if (currentlySelectedChat) {
@@ -112,9 +114,9 @@ let activeChatListener = function (userLiElement, user) {
         yield User.updateMe();
         let isAlreadyChatting = false;
         if (Object.keys(User.me.chats).length > 0) {
-            Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+            Object.entries(User.me.chats).forEach(([chatID, chat]) => {
                 //@ts-ignore
-                if (participants.includes(user.name)) {
+                if (chat.participants.includes(user.name)) {
                     userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
                     activeUsers.removeChild(userLiElement);
                     savedChats.appendChild(userLiElement);
@@ -143,15 +145,14 @@ let activeChatListener = function (userLiElement, user) {
         }
         displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants);
         chatNameField.innerHTML = user.name;
-        socket.emit("startChat", chatID, User.me.id);
         let usersInfo = new Array();
         usersInfo.push(User.me.name);
         usersInfo.push(user.name);
+        socket.emit("startChat", chatID, User.me.id);
         socket.emit("newChatRequest", usersInfo);
         chatStream(chatHistory.chat_id);
-        console.log(User.me.id, user.id);
-        yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), User.me.id);
-        yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants), user.id);
+        yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, false), User.me.id);
+        yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, true), user.id);
     });
 };
 let savedChatListener = function (userLiElement, chatID) {
@@ -181,31 +182,82 @@ let savedChatListener = function (userLiElement, chatID) {
         chatStream(chatHistory.chat_id);
     });
 };
+let requestedChatListener = function (userLiElement, chatID, chat, user) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (currentlySelectedChat) {
+            currentlySelectedChat.classList.remove('highlight');
+        }
+        if (savedChats.contains(userLiElement)) {
+            return;
+        }
+        // Handle click event for the user card (e.g., redirect to chat page)
+        //@ts-ignore
+        chatHistory = yield ChatHistory.getChatHistory(chatID);
+        if (displayedMessages != undefined) {
+            chatsHandler.innerHTML = "";
+        }
+        displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants);
+        userLiElement.classList.add('highlight');
+        currentlySelectedChat = userLiElement;
+        while (displayedMessages.messages.length < chatHistory.messages.length) {
+            let newMsg = chatHistory.messages[displayedMessages.messages.length];
+            displayedMessages.messages.push(newMsg);
+            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        }
+        userLiElement.removeEventListener('click', () => requestedChatListener(userLiElement, chatID, chat, user));
+        requestChats.removeChild(userLiElement);
+        savedChats.appendChild(userLiElement);
+        userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
+        chatHistory.participants.find(participant => {
+            if (participant != User.me.name)
+                chatNameField.innerHTML = participant;
+        });
+        socket.emit("startChat", chatHistory.chat_id, User.me.id);
+        chatStream(chatHistory.chat_id);
+        chat.isAccepted = true;
+        chat.isRequested = false;
+        yield User.updateChatsInUser(chat, User.me.id);
+        yield User.updateChatsInUser(chat, user.id);
+    });
+};
 function generateAllPossibleChats() {
     return __awaiter(this, void 0, void 0, function* () {
-        let savedChatsInfo = new Array();
+        let activeChats = new Array();
+        yield User.fetchUsers();
         if (Object.keys(User.me.chats).length > 0) {
-            Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+            Object.entries(User.me.chats).forEach(([chatID, chat]) => {
                 //@ts-ignore
-                if (participants.includes(User.me.name)) {
-                    //@ts-ignore
-                    const partnerName = participants.find(name => name !== User.me.name);
-                    savedChatsInfo.push(partnerName);
+                if (chat.participants.includes(User.me.name)) {
+                    const partnerName = chat.participants.find(name => name !== User.me.name);
+                    activeChats.push(partnerName !== null && partnerName !== void 0 ? partnerName : '');
                     let liElement = document.createElement("li");
                     let profileImage = document.createElement("img");
-                    profileImage.src = "../../avatars/1.png";
+                    profileImage.src = "../../avatars/2.png";
                     let nameOfChatPartner = document.createElement("span");
-                    nameOfChatPartner.innerHTML = partnerName;
-                    savedChats.appendChild(liElement);
-                    liElement.appendChild(profileImage);
-                    liElement.appendChild(nameOfChatPartner);
-                    liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
+                    //@ts-ignore
+                    if (User.me.chats[chatID].isRequested) {
+                        nameOfChatPartner.innerHTML = partnerName !== null && partnerName !== void 0 ? partnerName : '';
+                        requestChats.appendChild(liElement);
+                        liElement.appendChild(profileImage);
+                        liElement.appendChild(nameOfChatPartner);
+                        User.usersDB.find(user => {
+                            if (user.name == partnerName) {
+                                liElement.addEventListener('click', () => requestedChatListener(liElement, chatID, chat, user));
+                            }
+                        });
+                    }
+                    else {
+                        nameOfChatPartner.innerHTML = partnerName !== null && partnerName !== void 0 ? partnerName : '';
+                        savedChats.appendChild(liElement);
+                        liElement.appendChild(profileImage);
+                        liElement.appendChild(nameOfChatPartner);
+                        liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
+                    }
                 }
             });
         }
-        yield User.fetchUsers();
         User.usersDB.forEach((user) => {
-            if (User.me.name != user.name && !savedChatsInfo.includes(user.name)) {
+            if (User.me.name != user.name && !activeChats.includes(user.name)) {
                 let liElement = document.createElement("li");
                 let profileImage = document.createElement("img");
                 profileImage.src = "../../avatars/2.png";
@@ -255,8 +307,10 @@ export function handleReceiveMsg(senderID, message, timeSent) {
 }
 let oldChatID = "";
 function chatStream(chatID) {
+    console.log(`chat=${chatID}` + " " + `chat=${oldChatID}`);
     const chatListener = (newMsgStream) => {
         let newMsg = JSON.parse(newMsgStream);
+        console.log(newMsg);
         handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
     // Add the event listener

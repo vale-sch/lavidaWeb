@@ -43,18 +43,28 @@ function generateChatContainer(): HTMLElement {
 
     // Sidebar
     const sidebar = createElementWithClasses('div', { class: 'sidebar' }, ['full-height']);
+
+    const requestChats = createElement('div', { class: 'requested-chats' });
+    //requestChats.style.display = 'hidden';
+    requestChats.innerHTML = `
+    <h3>Requested</h3>
+    <ul id="requestChats">
+      
+    </ul>`;
     const savedChats = createElement('div', { class: 'saved-chats' });
     savedChats.innerHTML = `
-    <h3>Saved Chats</h3>
+    <h3>Chats</h3>
     <ul id="savedChats">
       
     </ul>`;
     const activeUsers = createElement('div', { class: 'active-users' });
     activeUsers.innerHTML = `
-    <h3>Active Users</h3>
+    <h3>Users</h3>
     <ul id="activeUsers">
       
     </ul>`;
+    sidebar.appendChild(requestChats);
+
     sidebar.appendChild(savedChats);
     sidebar.appendChild(activeUsers);
 
