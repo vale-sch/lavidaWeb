@@ -7,7 +7,7 @@ export let requestInfoObj: InfoStream;
 
 export function connectClientID(userID: number): void {
     //@ts-ignore
-    socket = io("wss://lavidasocket.onrender.com"); // ws://localhost:8080
+    socket = io("ws://localhost:8080"); //wss://lavidasocket.onrender.com 
     socket.emit("onconnect", JSON.stringify(userID));
 }
 

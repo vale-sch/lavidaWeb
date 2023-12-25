@@ -89,17 +89,17 @@ export function onStartChatManager() {
                     chatElement.HTMLLIElement.removeEventListener('click', () => activeChatListener(chatElement.HTMLLIElement, userToFind));
                 }
                 activeUsers.removeChild(chatElement.HTMLLIElement);
-                savedChats.appendChild(chatElement.HTMLLIElement);
+                requestChats.appendChild(chatElement.HTMLLIElement);
                 User.updateMe();
                 await delay(500);
                 User.updateMe();
                 await delay(500);
                 User.updateMe();
                 if (Object.keys(User.me.chats).length > 0) {
-                    Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+                    Object.entries(User.me.chats).forEach(([chatID, chat]) => {
                         //@ts-ignore
-                        if (participants.includes(userToFind.name)) {
-                            chatElement.HTMLLIElement.addEventListener('click', () => savedChatListener(chatElement.HTMLLIElement, chatID));
+                        if (chat.participants.includes(userToFind.name)) {
+                            chatElement.HTMLLIElement.addEventListener('click', () => requestedChatListener(chatElement.HTMLLIElement, chatID, chat, userToFind));
                         }
                     });
                 }
@@ -111,13 +111,13 @@ export function onStartChatManager() {
 
 let activeChatListener = async function (userLiElement: HTMLLIElement, user: User) {
 
-    if (savedChats.contains(userLiElement)) {
+    if (savedChats.contains(userLiElement) || requestChats.contains(userLiElement))
         return;
-    }
 
-    if (currentlySelectedChat) {
+
+    if (currentlySelectedChat)
         currentlySelectedChat.classList.remove('highlight');
-    }
+
     await User.updateMe();
     let isAlreadyChatting: boolean = false;
 
@@ -338,7 +338,9 @@ export function handleReceiveMsg(senderID: string, message: string, timeSent: st
     }
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
-let oldChatID: string = "";
+let oldChatID: string;
+let currentListener: Function | null = null;
+
 function chatStream(chatID: string): void {
     console.log(`chat=${chatID}` + " " + `chat=${oldChatID}`)
     const chatListener = (newMsgStream: string) => {
@@ -346,13 +348,16 @@ function chatStream(chatID: string): void {
         console.log(newMsg);
         handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
-    // Add the event listener
-    socket.on(`chat=${chatID}`, chatListener);
 
-    // Later, to remove the specific listener
-    if (oldChatID != "")
-        socket.off(`chat=${oldChatID}`, chatListener);
+    // Remove old chat listener
+    if (oldChatID && currentListener) {
+        socket.off(oldChatID, currentListener);
+    }
+
+    // Add new chat listener
+    socket.on(chatID, chatListener);
     oldChatID = chatID;
+    currentListener = chatListener;
 }
 
 

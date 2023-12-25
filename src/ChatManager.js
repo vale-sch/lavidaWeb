@@ -85,17 +85,17 @@ export function onStartChatManager() {
                     chatElement.HTMLLIElement.removeEventListener('click', () => activeChatListener(chatElement.HTMLLIElement, userToFind));
                 }
                 activeUsers.removeChild(chatElement.HTMLLIElement);
-                savedChats.appendChild(chatElement.HTMLLIElement);
+                requestChats.appendChild(chatElement.HTMLLIElement);
                 User.updateMe();
                 yield delay(500);
                 User.updateMe();
                 yield delay(500);
                 User.updateMe();
                 if (Object.keys(User.me.chats).length > 0) {
-                    Object.entries(User.me.chats).forEach(([chatID, participants]) => {
+                    Object.entries(User.me.chats).forEach(([chatID, chat]) => {
                         //@ts-ignore
-                        if (participants.includes(userToFind.name)) {
-                            chatElement.HTMLLIElement.addEventListener('click', () => savedChatListener(chatElement.HTMLLIElement, chatID));
+                        if (chat.participants.includes(userToFind.name)) {
+                            chatElement.HTMLLIElement.addEventListener('click', () => requestedChatListener(chatElement.HTMLLIElement, chatID, chat, userToFind));
                         }
                     });
                 }
@@ -105,12 +105,10 @@ export function onStartChatManager() {
 }
 let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (savedChats.contains(userLiElement)) {
+        if (savedChats.contains(userLiElement) || requestChats.contains(userLiElement))
             return;
-        }
-        if (currentlySelectedChat) {
+        if (currentlySelectedChat)
             currentlySelectedChat.classList.remove('highlight');
-        }
         yield User.updateMe();
         let isAlreadyChatting = false;
         if (Object.keys(User.me.chats).length > 0) {
@@ -305,7 +303,8 @@ export function handleReceiveMsg(senderID, message, timeSent) {
     }
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
-let oldChatID = "";
+let oldChatID;
+let currentListener = null;
 function chatStream(chatID) {
     console.log(`chat=${chatID}` + " " + `chat=${oldChatID}`);
     const chatListener = (newMsgStream) => {
@@ -313,10 +312,12 @@ function chatStream(chatID) {
         console.log(newMsg);
         handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
-    // Add the event listener
-    socket.on(`chat=${chatID}`, chatListener);
-    // Later, to remove the specific listener
-    if (oldChatID != "")
-        socket.off(`chat=${oldChatID}`, chatListener);
+    // Remove old chat listener
+    if (oldChatID && currentListener) {
+        socket.off(oldChatID, currentListener);
+    }
+    // Add new chat listener
+    socket.on(chatID, chatListener);
     oldChatID = chatID;
+    currentListener = chatListener;
 }
