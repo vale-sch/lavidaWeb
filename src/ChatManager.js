@@ -304,7 +304,7 @@ export function displayReceivedMsg(senderID, message, timeSent) {
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
 let oldChatID;
-let currentListener = null;
+let oldListener = null;
 function chatStream(chatID) {
     const chatListener = (newMsgStream) => {
         let newMsg = JSON.parse(newMsgStream);
@@ -313,11 +313,11 @@ function chatStream(chatID) {
         displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
     // Remove old chat listener
-    if (oldChatID && currentListener) {
-        socket.off(oldChatID, currentListener);
+    if (oldChatID && oldListener) {
+        socket.off(oldChatID, oldListener);
     }
     // Add new chat listener
     socket.on(chatID, chatListener);
     oldChatID = chatID;
-    currentListener = chatListener;
+    oldListener = chatListener;
 }

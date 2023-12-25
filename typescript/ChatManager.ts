@@ -339,7 +339,7 @@ export function displayReceivedMsg(senderID: string, message: string, timeSent: 
     chatsHandler.scrollTop = chatsHandler.scrollHeight;
 }
 let oldChatID: string;
-let currentListener: Function | null = null;
+let oldListener: Function | null = null;
 
 function chatStream(chatID: string): void {
     const chatListener = (newMsgStream: string) => {
@@ -350,14 +350,14 @@ function chatStream(chatID: string): void {
     };
 
     // Remove old chat listener
-    if (oldChatID && currentListener) {
-        socket.off(oldChatID, currentListener);
+    if (oldChatID && oldListener) {
+        socket.off(oldChatID, oldListener);
     }
 
     // Add new chat listener
     socket.on(chatID, chatListener);
     oldChatID = chatID;
-    currentListener = chatListener;
+    oldListener = chatListener;
 }
 
 
