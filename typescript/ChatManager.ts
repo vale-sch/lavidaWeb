@@ -185,7 +185,7 @@ let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: st
     while (displayedMessages.messages.length < chatHistory.messages.length) {
         let newMsg: Message = chatHistory.messages[displayedMessages.messages.length];
         displayedMessages.messages.push(newMsg);
-        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     }
 
     chatHistory.participants.find(participant => {
@@ -219,7 +219,7 @@ let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID
     while (displayedMessages.messages.length < chatHistory.messages.length) {
         let newMsg: Message = chatHistory.messages[displayedMessages.messages.length];
         displayedMessages.messages.push(newMsg);
-        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     }
 
     userLiElement.removeEventListener('click', () => requestedChatListener(userLiElement, chatID, chat, user));
@@ -302,7 +302,7 @@ async function generateAllPossibleChats(): Promise<void> {
 
 
 
-export function handleReceiveMsg(senderID: string, message: string, timeSent: string): void {
+export function displayReceivedMsg(senderID: string, message: string, timeSent: string): void {
     let msg: HTMLParagraphElement = document.createElement("p");
     msg.className = "txtMsg"
     msg.innerText = message;
@@ -342,11 +342,11 @@ let oldChatID: string;
 let currentListener: Function | null = null;
 
 function chatStream(chatID: string): void {
-    console.log(`chat=${chatID}` + " " + `chat=${oldChatID}`)
     const chatListener = (newMsgStream: string) => {
         let newMsg: Message = JSON.parse(newMsgStream);
-        console.log(newMsg);
-        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        if (newMsg.sender_id != User.me.name)
+            chatHistory.messages.push(newMsg);
+        displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
 
     // Remove old chat listener

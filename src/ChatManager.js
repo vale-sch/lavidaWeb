@@ -170,7 +170,7 @@ let savedChatListener = function (userLiElement, chatID) {
         while (displayedMessages.messages.length < chatHistory.messages.length) {
             let newMsg = chatHistory.messages[displayedMessages.messages.length];
             displayedMessages.messages.push(newMsg);
-            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+            displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
         }
         chatHistory.participants.find(participant => {
             if (participant != User.me.name)
@@ -200,7 +200,7 @@ let requestedChatListener = function (userLiElement, chatID, chat, user) {
         while (displayedMessages.messages.length < chatHistory.messages.length) {
             let newMsg = chatHistory.messages[displayedMessages.messages.length];
             displayedMessages.messages.push(newMsg);
-            handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+            displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
         }
         userLiElement.removeEventListener('click', () => requestedChatListener(userLiElement, chatID, chat, user));
         requestChats.removeChild(userLiElement);
@@ -271,7 +271,7 @@ function generateAllPossibleChats() {
         });
     });
 }
-export function handleReceiveMsg(senderID, message, timeSent) {
+export function displayReceivedMsg(senderID, message, timeSent) {
     let msg = document.createElement("p");
     msg.className = "txtMsg";
     msg.innerText = message;
@@ -306,11 +306,11 @@ export function handleReceiveMsg(senderID, message, timeSent) {
 let oldChatID;
 let currentListener = null;
 function chatStream(chatID) {
-    console.log(`chat=${chatID}` + " " + `chat=${oldChatID}`);
     const chatListener = (newMsgStream) => {
         let newMsg = JSON.parse(newMsgStream);
-        console.log(newMsg);
-        handleReceiveMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
+        if (newMsg.sender_id != User.me.name)
+            chatHistory.messages.push(newMsg);
+        displayReceivedMsg(newMsg.sender_id, newMsg.message, newMsg.time_sent);
     };
     // Remove old chat listener
     if (oldChatID && currentListener) {
