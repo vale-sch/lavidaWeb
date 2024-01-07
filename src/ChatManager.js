@@ -86,11 +86,12 @@ export function onStartChatManager() {
                 }
                 activeUsers.removeChild(chatElement.HTMLLIElement);
                 requestChats.appendChild(chatElement.HTMLLIElement);
-                User.updateMe();
                 yield delay(500);
-                User.updateMe();
+                yield User.updateMe();
                 yield delay(500);
-                User.updateMe();
+                yield User.updateMe();
+                yield delay(500);
+                yield User.updateMe();
                 if (Object.keys(User.me.chats).length > 0) {
                     Object.entries(User.me.chats).forEach(([chatID, chat]) => {
                         //@ts-ignore
