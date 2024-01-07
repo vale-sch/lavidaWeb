@@ -38,6 +38,7 @@ export function onStartChatManager() {
     socket.emit("newChatPartner", User.me);
     generateAllPossibleChats();
 
+
     sendButton.addEventListener("click", async () => {
         if (msgField.value.trim() !== "") {
             let msgToSend: string = msgField.value;
