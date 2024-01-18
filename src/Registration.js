@@ -43,7 +43,7 @@ function registrateMe() {
 }
 function uploadFileToGitHub(file, userID) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = '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';
+        const token = "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";
         const repoOwner = 'vale-sch';
         const repoName = 'lavidaWeb';
         const branchName = 'main'; // Branch, in den du hochladen möchtest

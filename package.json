@@ -1,8 +1,7 @@
 {
   "devDependencies": {
     "@types/node": "^20.8.10",
-    "types": "^0.1.1",
-    "type": "module"
+    "types": "^0.1.1"
   },
   "scripts": {
     "tsc": "tsc",
@@ -16,7 +15,6 @@
     "mongodb": "^6.2.0",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
-    "ts-node": "^10.9.1",
-    "type": "module"
+    "ts-node": "^10.9.1"
   }
 }
