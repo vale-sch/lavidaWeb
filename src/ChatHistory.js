@@ -70,7 +70,8 @@ export class ChatHistory {
                     body: JSON.stringify(this),
                 });
                 if (response.status === 201) {
-                    yield response.json();
+                    let test = yield response.json();
+                    console.log(test);
                 }
                 else {
                     let data = yield response.json();
@@ -91,9 +92,8 @@ export class ChatHistory {
                         'Content-Type': 'application/json',
                     },
                 });
-                if (response.status === 201) {
-                    let deleted_chat = yield response.json();
-                    console.log(deleted_chat);
+                if (response.status === 200) {
+                    yield response.json();
                 }
                 else {
                     let data = yield response.json();

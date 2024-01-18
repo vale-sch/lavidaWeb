@@ -15,22 +15,27 @@ if (buttonDiv != null) {
 async function registrateMe(): Promise<void> {
     let nameValue: string = (document.getElementById("name") as HTMLInputElement).value;
     let passwordValue: string = (document.getElementById("password") as HTMLInputElement).value;
-
-    if (!nameValue || !passwordValue) return;
+    let imgURL: string = (document.getElementById("fileInput") as HTMLInputElement).value;
+    if (!nameValue || !passwordValue || !imgURL) {
+        alert("You have to fill out all fields.")
+        return;
+    }
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     let userID: number = Math.floor((Date.now() + Math.random()) / 10000);
     try {
         let imgURL = await uploadFileToGitHub(fileInput.files?.[0] || new File([], ""), userID.toString()) as string;
-        console.log(imgURL);
+
+
         let newUser = new User(userID, nameValue, passwordValue, false, imgURL, new Array<Chat>());
         newUser.pushUser();
+        document.getElementsByClassName("container")[0].innerHTML = "You have been successfull registrated!";
     } catch (error) {
         console.error('Error uploading image:', error);
         // Handle error, such as informing the user about the issue
     }
 }
 async function uploadFileToGitHub(file: File, userID: string): Promise<string> {
-    const token = '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';
+    const token = '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';
     const repoOwner = 'vale-sch';
     const repoName = 'lavidaWeb';
     const branchName = 'main'; // Branch, in den du hochladen möchtest

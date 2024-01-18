@@ -44,6 +44,29 @@ export class User {
             }
         });
     }
+    static removeChatFromUser(chatId, userID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let response = yield fetch('https://lavida-server.vercel.app/api/remove_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ chatId, userID }),
+                });
+                if (response.status === 200) {
+                    yield response.json();
+                }
+                else {
+                    let data = yield response.json();
+                    console.log(`Error: ${data.error}`);
+                }
+            }
+            catch (error) {
+                console.error('Error removing chat:', error);
+            }
+        });
+    }
     pushUser() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -57,7 +80,7 @@ export class User {
                 if (response.status === 201) {
                     yield response.json();
                     window.location.replace("laVidaChat.html");
-                    alert("You have been successfull registrated!");
+                    alert("Registration successfull! Redirecting to login page");
                 }
                 else {
                     let data = yield response.json();
@@ -82,7 +105,7 @@ export class User {
                 });
                 if (response.status === 201) {
                     let me = yield response.json();
-                    User.me = me;
+                    User.me = new User(me.id, me.name, me.password, me.isactive, me.profileimageurl, me.chats);
                 }
                 else {
                     yield response.json();

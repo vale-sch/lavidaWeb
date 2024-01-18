@@ -19,15 +19,15 @@ let chatElements: Array<ChatElement> = new Array<ChatElement>();
 let chatNameField: HTMLHeadElement;
 
 let chatHistory: ChatHistory;
-
+let deleteChatButton: HTMLButtonElement;
 let displayedMessages: ChatHistory;
 let currentlySelectedChat: HTMLLIElement | null = null;
 function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 export function onStartChatManager() {
-    chatNameField = document.getElementsByClassName("chat-header")[0] as HTMLHeadingElement;
-
+    chatNameField = document.getElementById("chatHeaderH2") as HTMLHeadingElement;
+    deleteChatButton = document.getElementById("deleteBtn") as HTMLButtonElement;
     chatsHandler = <HTMLDivElement>document.getElementById("chatsHandler");
     sendButton = document.getElementById("sendButton") as HTMLButtonElement;
     msgField = <HTMLTextAreaElement>document.getElementsByClassName("message-input")[0].getElementsByTagName("textarea")[0];
@@ -37,13 +37,17 @@ export function onStartChatManager() {
     requestChats = <HTMLUListElement>document.getElementById("requestChats");
     socket.emit("newChatPartner", User.me);
     generateAllPossibleChats();
-
+    addDeleteButton();
 
     sendButton.addEventListener("click", async () => {
         if (msgField.value.trim() !== "") {
             let msgToSend: string = msgField.value;
-            msgField.value = "";
-            await chatHistory.sendMsg(User.me.name, msgToSend);
+            if (chatHistory)
+                if (chatHistory.chat_id != "") {
+                    msgField.value = "";
+                    await chatHistory.sendMsg(User.me.name, msgToSend);
+                }
+
         }
     });
 
@@ -51,9 +55,13 @@ export function onStartChatManager() {
         if ((e as KeyboardEvent).key === 'Enter') {
             if (msgField.value.trim() !== "") {
                 let msgToSend: string = msgField.value;
-                msgField.value = ""; // Clear the message field
-                e.preventDefault(); // Prevent the default behavior (line break)
-                await chatHistory.sendMsg(User.me.name, msgToSend);
+                if (chatHistory)
+                    if (chatHistory.chat_id != "") {
+                        e.preventDefault(); // Prevent the default behavior (line break)
+                        msgField.value = "";
+                        await chatHistory.sendMsg(User.me.name, msgToSend);
+                    }
+
             }
         }
     });
@@ -67,9 +75,90 @@ export function onStartChatManager() {
             }
         });
         if (isNewUser) {
+            await delay(1000);
+            await User.updateMe();
+
+            requestChats.innerHTML = "";
+            savedChats.innerHTML = "";
+            activeUsers.innerHTML = "";
+            generateAllPossibleChats();
+        }
+    });
+    socket.on(`${User.me.name}`, async (chatRequestUser: string) => {
+        await delay(1500);
+        await User.updateMe();
+        requestChats.innerHTML = "";
+        savedChats.innerHTML = "";
+        activeUsers.innerHTML = "";
+        generateAllPossibleChats();
+    });
+
+    socket.on(`${User.me.name}toDelete`, async (chatToDelete: string) => {
+        await delay(1000);
+        await User.updateMe();
+        requestChats.innerHTML = "";
+        savedChats.innerHTML = "";
+        activeUsers.innerHTML = "";
+        if (chatToDelete == chatHistory.chat_id) {
+            chatsHandler.innerHTML = "";
+            chatNameField.innerHTML = "LaVida Chat";
+            deleteChatButton.style.visibility = "hidden";
+        }
+        generateAllPossibleChats();
+
+
+    });
+
+}
+function generateAllPossibleChats(): void {
+    let activeChats: string[] = new Array<string>();
+    if (Object.keys(User.me.chats).length > 0) {
+        Object.entries(User.me.chats).forEach(([chatID, chat]) => {
+            //@ts-ignore
+            if (chat.participants.includes(User.me.name)) {
+                let partnerName = chat.participants.find(name => name !== User.me.name);
+                let chatPartner: User | undefined = User.usersDB.find(user => user.name == partnerName);
+                activeChats.push(partnerName ?? '');
+
+                let liElement: HTMLLIElement = document.createElement("li");
+                let profileImage: HTMLImageElement = document.createElement("img");
+                profileImage.src = chatPartner?.profileImgURL ?? "";
+                let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
+                //@ts-ignore
+                if (chat.isRequested) {
+                    nameOfChatPartner.innerHTML = partnerName ?? '';
+                    requestChats.appendChild(liElement);
+                    liElement.appendChild(profileImage);
+                    liElement.appendChild(nameOfChatPartner);
+                    if (chatPartner) {
+                        let chatElement: ChatElement = new ChatElement(liElement, chatPartner.name); // Fix: Added nullish coalescing operator
+                        chatElements.push(chatElement);
+                    }
+
+                    User.usersDB.find(user => {
+                        if (user.name == partnerName) {
+                            liElement.addEventListener('click', () => requestedChatListener(liElement, chatID, chat, user));
+                        }
+                    });
+                } else {
+                    if (chatPartner) {
+                        nameOfChatPartner.innerHTML = partnerName ?? '';
+                        savedChats.appendChild(liElement);
+                        liElement.appendChild(profileImage);
+                        liElement.appendChild(nameOfChatPartner);
+                        liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
+                        let chatElement: ChatElement = new ChatElement(liElement, chatPartner.name);
+                        chatElements.push(chatElement);
+                    }
+                }
+            }
+        });
+    }
+    User.usersDB.forEach((user: User) => {
+        if (User.me.name != user.name && !activeChats.includes(user.name)) {
             let liElement: HTMLLIElement = document.createElement("li");
             let profileImage: HTMLImageElement = document.createElement("img");
-            profileImage.src = newUser.profileImgURL;
+            profileImage.src = user.profileImgURL;
             let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
             nameOfChatPartner.innerHTML = user.name;
             activeUsers.appendChild(liElement);
@@ -79,43 +168,10 @@ export function onStartChatManager() {
             let chatElement: ChatElement = new ChatElement(liElement, user.name);
             chatElements.push(chatElement);
         }
-        await User.fetchUsers();
-    });
-    socket.on(`${User.me.name}`, async (chatRequestUser: string) => {
-        chatElements.forEach(async chatElement => {
-            if (chatElement.name == chatRequestUser) {
-                let userToFind = <User>User.usersDB.find(user => user.name == chatRequestUser);
-
-                if (userToFind) {
-                    chatElement.HTMLLIElement.removeEventListener('click', () => activeChatListener(chatElement.HTMLLIElement, userToFind));
-                }
-                activeUsers.removeChild(chatElement.HTMLLIElement);
-                requestChats.appendChild(chatElement.HTMLLIElement);
-                await delay(500);
-                await User.updateMe();
-                await delay(500);
-                await User.updateMe();
-                await delay(500);
-                await User.updateMe();
-                if (Object.keys(User.me.chats).length > 0) {
-                    Object.entries(User.me.chats).forEach(([chatID, chat]) => {
-                        //@ts-ignore
-                        if (chat.participants.includes(userToFind.name)) {
-                            chatElement.HTMLLIElement.addEventListener('click', () => requestedChatListener(chatElement.HTMLLIElement, chatID, chat, userToFind));
-                        }
-                    });
-                }
-            }
-        });
-
     });
 }
 
 let activeChatListener = async function (userLiElement: HTMLLIElement, user: User) {
-
-    if (savedChats.contains(userLiElement) || requestChats.contains(userLiElement))
-        return;
-
 
     if (currentlySelectedChat)
         currentlySelectedChat.classList.remove('highlight');
@@ -144,8 +200,10 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     participants.push(user.name);
     chatHistory = ChatHistory.createNew(chatID, User.me.name, participants);
     await chatHistory.createChat();
-    userLiElement.removeEventListener('click', () => activeChatListener(userLiElement, user));
-    activeUsers.removeChild(userLiElement);
+    //check if activeusers akready removed the userLiElement
+    if (activeUsers.contains(userLiElement)) {
+        activeUsers.removeChild(userLiElement);
+    }
 
     savedChats.appendChild(userLiElement);
     userLiElement.addEventListener('click', () => savedChatListener(userLiElement, chatID));
@@ -166,13 +224,16 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     chatStream(chatHistory.chat_id);
     await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, false), User.me.id);
     await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, true), user.id);
+
+    makeDeleteButtonVisible();
+
 };
 
 let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: string) {
     if (currentlySelectedChat) {
         currentlySelectedChat.classList.remove('highlight');
     }
-    // Handle click event for the user card (e.g., redirect to chat page)
+
     //@ts-ignore
     chatHistory = await ChatHistory.getChatHistory(chatID);
     if (displayedMessages != undefined) {
@@ -197,16 +258,16 @@ let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: st
     })
     socket.emit("startChat", chatHistory.chat_id, User.me.id);
     chatStream(chatHistory.chat_id);
+    makeDeleteButtonVisible();
+
 };
 
+
 let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID: string, chat: Chat, user: User) {
+
     if (currentlySelectedChat) {
         currentlySelectedChat.classList.remove('highlight');
     }
-    if (savedChats.contains(userLiElement)) {
-        return;
-    }
-    // Handle click event for the user card (e.g., redirect to chat page)
     //@ts-ignore
     chatHistory = await ChatHistory.getChatHistory(chatID);
     if (displayedMessages != undefined) {
@@ -241,63 +302,46 @@ let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID
     chat.isRequested = false;
     await User.updateChatsInUser(chat, User.me.id);
     await User.updateChatsInUser(chat, user.id);
+    await User.updateMe();
+    makeDeleteButtonVisible();
+
 };
 
+function makeDeleteButtonVisible() {
+    deleteChatButton.style.visibility = "visible";
+}
+function addDeleteButton() {
+    deleteChatButton.addEventListener("click", async () => {
+        let user: User | undefined;
 
-
-async function generateAllPossibleChats(): Promise<void> {
-    let activeChats: string[] = new Array<string>();
-    await User.fetchUsers();
-
-    if (Object.keys(User.me.chats).length > 0) {
-        Object.entries(User.me.chats).forEach(([chatID, chat]) => {
-            //@ts-ignore
-            if (chat.participants.includes(User.me.name)) {
-                const partnerName = chat.participants.find(name => name !== User.me.name);
-                let chatPartner: User | undefined = User.usersDB.find(user => user.name == partnerName);
-                activeChats.push(partnerName ?? '');
-
-                let liElement: HTMLLIElement = document.createElement("li");
-                let profileImage: HTMLImageElement = document.createElement("img");
-                profileImage.src = chatPartner?.profileImgURL ?? "";
-                let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
-                //@ts-ignore
-                if (User.me.chats[chatID].isRequested) {
-                    nameOfChatPartner.innerHTML = partnerName ?? '';
-                    requestChats.appendChild(liElement);
-                    liElement.appendChild(profileImage);
-                    liElement.appendChild(nameOfChatPartner);
-                    User.usersDB.find(user => {
-                        if (user.name == partnerName) {
-                            liElement.addEventListener('click', () => requestedChatListener(liElement, chatID, chat, user));
-                        }
-                    });
-                } else {
-
-                    nameOfChatPartner.innerHTML = partnerName ?? '';
-                    savedChats.appendChild(liElement);
-                    liElement.appendChild(profileImage);
-                    liElement.appendChild(nameOfChatPartner);
-                    liElement.addEventListener('click', () => savedChatListener(liElement, chatID));
-                }
-            }
-        });
-    }
-    User.usersDB.forEach((user: User) => {
-        if (User.me.name != user.name && !activeChats.includes(user.name)) {
-            let liElement: HTMLLIElement = document.createElement("li");
-            let profileImage: HTMLImageElement = document.createElement("img");
-            console.log(user.profileImgURL);
-            profileImage.src = user.profileImgURL;
-            let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
-            nameOfChatPartner.innerHTML = user.name;
-            activeUsers.appendChild(liElement);
-            liElement.appendChild(profileImage);
-            liElement.appendChild(nameOfChatPartner);
-            liElement.addEventListener('click', () => activeChatListener(liElement, user));
-            let chatElement: ChatElement = new ChatElement(liElement, user.name);
-            chatElements.push(chatElement);
+        if (chatHistory) {
+            user = User.usersDB.find(user => user.name == chatHistory.participants.find(participant => participant != User.me.name));
         }
+
+        //delete the chat from the database
+        await chatHistory.deleteChat(chatHistory.chat_id);
+
+
+
+        //update the user and his participant in the database
+        if (user)
+            socket.emit("deleteChat", user.name, chatHistory.chat_id);
+
+        requestChats.innerHTML = "";
+        savedChats.innerHTML = "";
+        activeUsers.innerHTML = "";
+
+        //get the user of the currently selected chat
+        await User.removeChatFromUser(chatHistory.chat_id, user?.id ?? 0);
+        await User.removeChatFromUser(chatHistory.chat_id, User.me.id);
+        chatsHandler.innerHTML = "";
+        chatNameField.innerHTML = "LaVida Chat";
+        deleteChatButton.style.visibility = "hidden";
+
+        await User.fetchUsers();
+        await delay(200);
+        await User.updateMe();
+        generateAllPossibleChats();
     });
 }
 
@@ -306,7 +350,8 @@ async function generateAllPossibleChats(): Promise<void> {
 
 
 
-export function displayReceivedMsg(senderID: string, message: string, timeSent: string): void {
+
+export async function displayReceivedMsg(senderID: string, message: string, timeSent: string): Promise<void> {
     let msg: HTMLParagraphElement = document.createElement("p");
     msg.className = "txtMsg"
     msg.innerText = message;
@@ -331,8 +376,8 @@ export function displayReceivedMsg(senderID: string, message: string, timeSent: 
         sentDiv.className = "messageDiv sent"
 
         let imgMe: HTMLImageElement = document.createElement("img");
-        imgMe.src = User.me.profileImgURL;
 
+        imgMe.src = User.me.profileImgURL;
         let span: HTMLSpanElement = document.createElement("span");
         span.className = "time-right";
         span.innerHTML = timeSent;

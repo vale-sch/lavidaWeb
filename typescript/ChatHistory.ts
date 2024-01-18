@@ -79,7 +79,8 @@ export class ChatHistory {
             });
 
             if (response.status === 201) {
-                await response.json();
+                let test = await response.json();
+                console.log(test)
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);
@@ -98,9 +99,8 @@ export class ChatHistory {
                 },
             });
 
-            if (response.status === 201) {
-                let deleted_chat: string = await response.json();
-                console.log(deleted_chat);
+            if (response.status === 200) {
+                await response.json();
 
 
             } else {

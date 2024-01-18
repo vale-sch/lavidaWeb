@@ -41,6 +41,26 @@ export class User {
             console.error('Error creating user:', error);
         }
     }
+    static async removeChatFromUser(chatId: string, userID: number) {
+        try {
+            let response = await fetch('https://lavida-server.vercel.app/api/remove_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ chatId, userID }),
+            });
+
+            if (response.status === 200) {
+                await response.json();
+            } else {
+                let data = await response.json();
+                console.log(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Error removing chat:', error);
+        }
+    }
 
     async pushUser() {
         try {
@@ -54,7 +74,7 @@ export class User {
             if (response.status === 201) {
                 await response.json();
                 window.location.replace("laVidaChat.html");
-                alert("You have been successfull registrated!")
+                alert("Registration successfull! Redirecting to login page")
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);
@@ -76,7 +96,8 @@ export class User {
 
             if (response.status === 201) {
                 let me = await response.json();
-                User.me = me;
+
+                User.me = new User(me.id, me.name, me.password, me.isactive, me.profileimageurl, me.chats);
             } else {
                 await response.json();
             }
