@@ -65,7 +65,7 @@ export function onStartChatManager() {
         if (isNewUser) {
             let liElement = document.createElement("li");
             let profileImage = document.createElement("img");
-            profileImage.src = "../../avatars/2.png";
+            profileImage.src = newUser.profileImgURL;
             let nameOfChatPartner = document.createElement("span");
             nameOfChatPartner.innerHTML = user.name;
             activeUsers.appendChild(liElement);
@@ -225,13 +225,15 @@ function generateAllPossibleChats() {
         yield User.fetchUsers();
         if (Object.keys(User.me.chats).length > 0) {
             Object.entries(User.me.chats).forEach(([chatID, chat]) => {
+                var _a;
                 //@ts-ignore
                 if (chat.participants.includes(User.me.name)) {
                     const partnerName = chat.participants.find(name => name !== User.me.name);
+                    let chatPartner = User.usersDB.find(user => user.name == partnerName);
                     activeChats.push(partnerName !== null && partnerName !== void 0 ? partnerName : '');
                     let liElement = document.createElement("li");
                     let profileImage = document.createElement("img");
-                    profileImage.src = "../../avatars/2.png";
+                    profileImage.src = (_a = chatPartner === null || chatPartner === void 0 ? void 0 : chatPartner.profileImgURL) !== null && _a !== void 0 ? _a : "";
                     let nameOfChatPartner = document.createElement("span");
                     //@ts-ignore
                     if (User.me.chats[chatID].isRequested) {
@@ -259,7 +261,8 @@ function generateAllPossibleChats() {
             if (User.me.name != user.name && !activeChats.includes(user.name)) {
                 let liElement = document.createElement("li");
                 let profileImage = document.createElement("img");
-                profileImage.src = "../../avatars/2.png";
+                console.log(user.profileImgURL);
+                profileImage.src = user.profileImgURL;
                 let nameOfChatPartner = document.createElement("span");
                 nameOfChatPartner.innerHTML = user.name;
                 activeUsers.appendChild(liElement);
@@ -277,10 +280,11 @@ export function displayReceivedMsg(senderID, message, timeSent) {
     msg.className = "txtMsg";
     msg.innerText = message;
     if (User.me.name != senderID) {
+        let userToFind = User.usersDB.find(user => user.name == senderID);
         let receivedDiv = document.createElement("div");
         receivedDiv.className = "messageDiv received";
         let imgPartner = document.createElement("img");
-        imgPartner.src = "../../avatars/2.png";
+        imgPartner.src = userToFind.profileImgURL;
         let span = document.createElement("span");
         span.className = "time-left";
         span.innerHTML = timeSent;
@@ -293,7 +297,7 @@ export function displayReceivedMsg(senderID, message, timeSent) {
         let sentDiv = document.createElement("div");
         sentDiv.className = "messageDiv sent";
         let imgMe = document.createElement("img");
-        imgMe.src = "../../avatars/1.png";
+        imgMe.src = User.me.profileImgURL;
         let span = document.createElement("span");
         span.className = "time-right";
         span.innerHTML = timeSent;

@@ -69,7 +69,7 @@ export function onStartChatManager() {
         if (isNewUser) {
             let liElement: HTMLLIElement = document.createElement("li");
             let profileImage: HTMLImageElement = document.createElement("img");
-            profileImage.src = "../../avatars/2.png"
+            profileImage.src = newUser.profileImgURL;
             let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
             nameOfChatPartner.innerHTML = user.name;
             activeUsers.appendChild(liElement);
@@ -254,11 +254,12 @@ async function generateAllPossibleChats(): Promise<void> {
             //@ts-ignore
             if (chat.participants.includes(User.me.name)) {
                 const partnerName = chat.participants.find(name => name !== User.me.name);
+                let chatPartner: User | undefined = User.usersDB.find(user => user.name == partnerName);
                 activeChats.push(partnerName ?? '');
 
                 let liElement: HTMLLIElement = document.createElement("li");
                 let profileImage: HTMLImageElement = document.createElement("img");
-                profileImage.src = "../../avatars/2.png"
+                profileImage.src = chatPartner?.profileImgURL ?? "";
                 let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
                 //@ts-ignore
                 if (User.me.chats[chatID].isRequested) {
@@ -286,7 +287,8 @@ async function generateAllPossibleChats(): Promise<void> {
         if (User.me.name != user.name && !activeChats.includes(user.name)) {
             let liElement: HTMLLIElement = document.createElement("li");
             let profileImage: HTMLImageElement = document.createElement("img");
-            profileImage.src = "../../avatars/2.png"
+            console.log(user.profileImgURL);
+            profileImage.src = user.profileImgURL;
             let nameOfChatPartner: HTMLSpanElement = document.createElement("span");
             nameOfChatPartner.innerHTML = user.name;
             activeUsers.appendChild(liElement);
@@ -309,11 +311,12 @@ export function displayReceivedMsg(senderID: string, message: string, timeSent: 
     msg.className = "txtMsg"
     msg.innerText = message;
     if (User.me.name != senderID) {
+        let userToFind = <User>User.usersDB.find(user => user.name == senderID);
         let receivedDiv: HTMLDivElement = document.createElement("div");
         receivedDiv.className = "messageDiv received"
 
         let imgPartner: HTMLImageElement = document.createElement("img");
-        imgPartner.src = "../../avatars/2.png";
+        imgPartner.src = userToFind.profileImgURL;
 
         let span: HTMLSpanElement = document.createElement("span");
         span.className = "time-left";
@@ -328,7 +331,7 @@ export function displayReceivedMsg(senderID: string, message: string, timeSent: 
         sentDiv.className = "messageDiv sent"
 
         let imgMe: HTMLImageElement = document.createElement("img");
-        imgMe.src = "../../avatars/1.png";
+        imgMe.src = User.me.profileImgURL;
 
         let span: HTMLSpanElement = document.createElement("span");
         span.className = "time-right";

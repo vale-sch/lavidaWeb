@@ -8,15 +8,16 @@ export class User {
     public name: string = "";
     public password: string = "";
     public id: number = 0;
-
+    public profileImgURL: string = "";
     public chats!: Chat[];
 
-    constructor(_id: number, _name: string, _password: string, _isActive: boolean, chats: Chat[]) {
+    constructor(_id: number, _name: string, _password: string, _isActive: boolean, _profileImgURL: string, _chats: Chat[]) {
         this.id = _id;
         this.name = _name;
         this.password = _password;
         this.isActive = _isActive;
-        this.chats = chats;
+        this.profileImgURL = _profileImgURL;
+        this.chats = _chats;
     }
 
 
@@ -91,7 +92,7 @@ export class User {
             let usersFetched = await response.json();
             let increment: number = 0;
             usersFetched.forEach((userDB: any) => {
-                User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive, userDB.chats);
+                User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive, userDB.profileimageurl, userDB.chats);
                 increment++;
             });
         } catch (error) {

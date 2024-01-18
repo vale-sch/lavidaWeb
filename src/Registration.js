@@ -18,10 +18,69 @@ if (buttonDiv != null) {
     }));
 }
 function registrateMe() {
-    let nameValue = document.getElementById("name").value;
-    let passwordValue = document.getElementById("password").value;
-    if (!nameValue || !passwordValue)
-        return;
-    let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false, new Array());
-    newUser.pushUser();
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        let nameValue = document.getElementById("name").value;
+        let passwordValue = document.getElementById("password").value;
+        if (!nameValue || !passwordValue)
+            return;
+        const fileInput = document.getElementById('fileInput');
+        let userID = Math.floor((Date.now() + Math.random()) / 10000);
+        try {
+            let imgURL = yield uploadFileToGitHub(((_a = fileInput.files) === null || _a === void 0 ? void 0 : _a[0]) || new File([], ""), userID.toString());
+            console.log(imgURL);
+            let newUser = new User(userID, nameValue, passwordValue, false, imgURL, new Array());
+            newUser.pushUser();
+        }
+        catch (error) {
+            console.error('Error uploading image:', error);
+            // Handle error, such as informing the user about the issue
+        }
+    });
+}
+function uploadFileToGitHub(file, userID) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = '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';
+        const repoOwner = 'vale-sch';
+        const repoName = 'lavidaWeb';
+        const branchName = 'main'; // Branch, in den du hochladen möchtest
+        const filePath = `images/${userID + file.name}`; // Dateipfad im Repository
+        const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+            reader.onload = () => __awaiter(this, void 0, void 0, function* () {
+                var _a;
+                const base64Data = (_a = reader.result) === null || _a === void 0 ? void 0 : _a.toString().split(',')[1];
+                const data = {
+                    message: 'Upload Image',
+                    content: base64Data,
+                    branch: branchName,
+                };
+                try {
+                    const response = yield fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `token ${token}`,
+                        },
+                        body: JSON.stringify(data),
+                    });
+                    if (response.status === 201) {
+                        const responseData = yield response.json();
+                        const imageUrl = responseData.content.download_url;
+                        resolve(imageUrl);
+                    }
+                    else {
+                        console.error('Fehler beim Hochladen:', response.statusText);
+                        reject(response.statusText);
+                    }
+                }
+                catch (error) {
+                    console.error('Fehler beim Hochladen:', error);
+                    reject(error.toString());
+                }
+            });
+            reader.readAsDataURL(file);
+        });
+    });
 }

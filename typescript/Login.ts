@@ -49,6 +49,7 @@ async function checkCredentials() {
         createChatPage();
         connectClientID(User.me.id);
         onStartChatManager();
+        User.fetchUsers();
     } else
         alert("Wrong Username or Password, try again.");
 }

@@ -8,16 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 export class User {
-    constructor(_id, _name, _password, _isActive, chats) {
+    constructor(_id, _name, _password, _isActive, _profileImgURL, _chats) {
         this.isActive = true;
         this.name = "";
         this.password = "";
         this.id = 0;
+        this.profileImgURL = "";
         this.id = _id;
         this.name = _name;
         this.password = _password;
         this.isActive = _isActive;
-        this.chats = chats;
+        this.profileImgURL = _profileImgURL;
+        this.chats = _chats;
     }
     static updateChatsInUser(chat, userID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -98,7 +100,7 @@ export class User {
                 let usersFetched = yield response.json();
                 let increment = 0;
                 usersFetched.forEach((userDB) => {
-                    User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive, userDB.chats);
+                    User.usersDB[increment] = new User(userDB.id, userDB.name, userDB.password, userDB.isactive, userDB.profileimageurl, userDB.chats);
                     increment++;
                 });
             }
