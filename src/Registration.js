@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { User } from "./User.js";
-import { showLoadingOverlay } from "./SiteChanger.js";
+import { hideLoadingOverlay, showLoadingOverlay } from "./SiteChanger.js";
 let buttonDiv = document.getElementById("registration");
 let shuffleButton = document.getElementById("shuffle");
 let profile_img = document.getElementById("profile_image");
@@ -24,9 +24,6 @@ if (buttonDiv != null) {
         shuffleImages();
     }
 }
-// Example usage:
-// Call showLoadingOverlay() when you want to start loading.
-// Call hideLoadingOverlay() when your loading process is complete.
 function registrateMe() {
     return __awaiter(this, void 0, void 0, function* () {
         let nameValue = document.getElementById("name").value;
@@ -38,7 +35,21 @@ function registrateMe() {
         try {
             let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false, profile_img.src, new Array());
             showLoadingOverlay();
-            yield newUser.pushUser();
+            let isSuccess = yield newUser.pushUser();
+            if (isSuccess) {
+                hideLoadingOverlay();
+                let divClass = document.getElementsByClassName("content")[0];
+                divClass.innerHTML = `<h1>Thank you for registering ${newUser.name}!</h1>`;
+                divClass.innerHTML += `<p>You can now log in with your credentials.</p>`;
+                divClass.innerHTML += `You will be redirected in 5 seconds.`;
+                setTimeout(() => {
+                    window.location.replace("laVidaChat.html");
+                }, 5000);
+            }
+            else {
+                hideLoadingOverlay();
+                alert("Something went wrong. Please try again.");
+            }
         }
         catch (error) {
             alert('Error pushing user:' + error.toString());

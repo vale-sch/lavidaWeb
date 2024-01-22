@@ -65,7 +65,7 @@ export class User {
         }
     }
 
-    async pushUser() {
+    async pushUser(): Promise<boolean> {
         try {
             let response = await fetch('https://lavida-server.vercel.app/api/create_user', {
                 method: 'POST',
@@ -76,16 +76,15 @@ export class User {
             });
             if (response.status === 201) {
                 await response.json();
-                hideLoadingOverlay();
-
-                window.location.replace("laVidaChat.html");
-                alert("You have successfully registered!");
+                return true;
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);
+                return false;
             }
         } catch (error) {
             console.error('Error creating user:', error);
+            return false;
         }
     }
     static async updateMe(): Promise<void> {

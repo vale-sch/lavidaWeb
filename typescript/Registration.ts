@@ -1,7 +1,7 @@
 import { Chat } from "./Chat.js";
 import { User } from "./User.js";
 
-import { showLoadingOverlay } from "./SiteChanger.js";
+import { hideLoadingOverlay, showLoadingOverlay } from "./SiteChanger.js";
 
 let buttonDiv: HTMLInputElement = document.getElementById("registration") as HTMLInputElement;
 let shuffleButton: HTMLButtonElement = document.getElementById("shuffle") as HTMLButtonElement;
@@ -22,12 +22,6 @@ if (buttonDiv != null) {
 
 
 
-
-// Example usage:
-// Call showLoadingOverlay() when you want to start loading.
-// Call hideLoadingOverlay() when your loading process is complete.
-
-
 async function registrateMe(): Promise<void> {
     let nameValue: string = (document.getElementById("name") as HTMLInputElement).value;
     let passwordValue: string = (document.getElementById("password") as HTMLInputElement).value;
@@ -38,7 +32,23 @@ async function registrateMe(): Promise<void> {
     try {
         let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false, profile_img.src, new Array<Chat>());
         showLoadingOverlay();
-        await newUser.pushUser();
+        let isSuccess: boolean = await newUser.pushUser();
+        if (isSuccess) {
+            hideLoadingOverlay();
+
+            let divClass: HTMLDivElement = document.getElementsByClassName("content")[0] as HTMLDivElement;
+            divClass.innerHTML = `<h1>Thank you for registering ${newUser.name}!</h1>`;
+            divClass.innerHTML += `<p>You can now log in with your credentials.</p>`;
+            divClass.innerHTML += `You will be redirected in 5 seconds.`;
+            setTimeout(() => {
+                window.location.replace("laVidaChat.html");
+            }, 5000);
+        } else {
+            hideLoadingOverlay();
+            alert("Something went wrong. Please try again.");
+        }
+
+
     } catch (error: string | any) {
         alert('Error pushing user:' + (error.toString() as string));
         // Handle error, such as informing the user about the issue

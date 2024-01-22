@@ -7,7 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { hideLoadingOverlay } from "./SiteChanger.js";
 export class User {
     constructor(_id, _name, _password, _isActive, _profileImgURL, _chats) {
         this.isActive = true;
@@ -80,17 +79,17 @@ export class User {
                 });
                 if (response.status === 201) {
                     yield response.json();
-                    hideLoadingOverlay();
-                    window.location.replace("laVidaChat.html");
-                    alert("You have successfully registered!");
+                    return true;
                 }
                 else {
                     let data = yield response.json();
                     console.log(`Error: ${data.error}`);
+                    return false;
                 }
             }
             catch (error) {
                 console.error('Error creating user:', error);
+                return false;
             }
         });
     }
