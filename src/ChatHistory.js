@@ -70,8 +70,7 @@ export class ChatHistory {
                     body: JSON.stringify(this),
                 });
                 if (response.status === 201) {
-                    let test = yield response.json();
-                    console.log(test);
+                    yield response.json();
                 }
                 else {
                     let data = yield response.json();

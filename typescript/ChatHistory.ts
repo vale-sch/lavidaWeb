@@ -79,8 +79,7 @@ export class ChatHistory {
             });
 
             if (response.status === 201) {
-                let test = await response.json();
-                console.log(test)
+                await response.json();
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);

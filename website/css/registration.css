@@ -15,13 +15,47 @@ body {
 
 .container {
     position: absolute;
-    top: 50vh;
+    top: 40vh;
     max-width: 700px;
     width: 100%;
     background-color: #fff;
     padding: 25px 30px;
     border-radius: 5px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    margin: 0 auto;
+}
+#shuffle {
+    display: inline-block;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #71b7e6, #9b59b6);    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    padding: 20px;
+    width: 200px;
+    transition: all 0.5s;
+    cursor: pointer;
+    margin: 0 auto;
+}
+
+#shuffle span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+
+#shuffle span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+
+#shuffle:hover  {
+        background: linear-gradient(-135deg, #71b7e6, #9b59b6);
 }
 
 .container .title {
@@ -141,7 +175,7 @@ form .button input:hover {
 #lavida {
     position: absolute;
     top: 5vh;
-    width: 20vw;
+    width: 15vw;
 }
 @media(max-width: 584px) {
     .container {

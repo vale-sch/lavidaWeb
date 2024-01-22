@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>Registration | LaVida</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
+    <script src="https://kit.fontawesome.com/e3de210ccf.js" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="../../website/css/registration.css">
     <script type="module" src="../../src/Registration.js" defer=""></script>
@@ -32,8 +33,11 @@
                     </div>
 
                     <div class="input-box">
-                        <span class="details">Profile Image</span>
-                        <input type="file" id="fileInput" accept="image/*" required />
+                        <span class="details">Avatar</span>
+                        <img id="profile_image"
+                            src="https://raw.githubusercontent.com/vale-sch/lavidaWeb/main/avatars/p%20(1).jpg"
+                            alt="profile_image" style="width: 200px;">
+                        <button class="fa-solid fa-shuffle" id="shuffle" formnovalidate></button>
                     </div>
                 </div>
 

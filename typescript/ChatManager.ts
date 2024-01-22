@@ -330,13 +330,14 @@ function addDeleteButton() {
         requestChats.innerHTML = "";
         savedChats.innerHTML = "";
         activeUsers.innerHTML = "";
+        chatsHandler.innerHTML = "";
+        chatNameField.innerHTML = "LaVida Chat";
+        deleteChatButton.style.visibility = "hidden";
 
         //get the user of the currently selected chat
         await User.removeChatFromUser(chatHistory.chat_id, user?.id ?? 0);
         await User.removeChatFromUser(chatHistory.chat_id, User.me.id);
-        chatsHandler.innerHTML = "";
-        chatNameField.innerHTML = "LaVida Chat";
-        deleteChatButton.style.visibility = "hidden";
+
 
         await User.fetchUsers();
         await delay(200);

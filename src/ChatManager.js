@@ -294,12 +294,12 @@ function addDeleteButton() {
         requestChats.innerHTML = "";
         savedChats.innerHTML = "";
         activeUsers.innerHTML = "";
-        //get the user of the currently selected chat
-        yield User.removeChatFromUser(chatHistory.chat_id, (_a = user === null || user === void 0 ? void 0 : user.id) !== null && _a !== void 0 ? _a : 0);
-        yield User.removeChatFromUser(chatHistory.chat_id, User.me.id);
         chatsHandler.innerHTML = "";
         chatNameField.innerHTML = "LaVida Chat";
         deleteChatButton.style.visibility = "hidden";
+        //get the user of the currently selected chat
+        yield User.removeChatFromUser(chatHistory.chat_id, (_a = user === null || user === void 0 ? void 0 : user.id) !== null && _a !== void 0 ? _a : 0);
+        yield User.removeChatFromUser(chatHistory.chat_id, User.me.id);
         yield User.fetchUsers();
         yield delay(200);
         yield User.updateMe();
