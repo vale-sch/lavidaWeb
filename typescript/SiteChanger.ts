@@ -18,7 +18,19 @@ export function createChatPage() {
     let generatedChatContainer = generateChatContainer();
     document.body.appendChild(generatedChatContainer);
 }
+export function showLoadingOverlay(): void {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+    }
+}
 
+export function hideLoadingOverlay(): void {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+    }
+}
 // Function to create an element with specified attributes
 function createElement(tag: string, attributes: { [key: string]: string }): HTMLElement {
     let element = document.createElement(tag);

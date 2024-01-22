@@ -1,6 +1,8 @@
 import { Chat } from "./Chat.js";
 import { User } from "./User.js";
 
+import { showLoadingOverlay } from "./SiteChanger.js";
+
 let buttonDiv: HTMLInputElement = document.getElementById("registration") as HTMLInputElement;
 let shuffleButton: HTMLButtonElement = document.getElementById("shuffle") as HTMLButtonElement;
 let profile_img: HTMLImageElement = document.getElementById("profile_image") as HTMLImageElement;
@@ -12,12 +14,18 @@ if (buttonDiv != null) {
             registrateMe();
         }
     });
-}
-if (shuffleButton != null) {
-    shuffleButton.addEventListener("click", shuffleImages);
-    shuffleImages();
+    if (shuffleButton != null) {
+        shuffleButton.addEventListener("click", shuffleImages);
+        shuffleImages();
+    }
 }
 
+
+
+
+// Example usage:
+// Call showLoadingOverlay() when you want to start loading.
+// Call hideLoadingOverlay() when your loading process is complete.
 
 
 async function registrateMe(): Promise<void> {
@@ -29,8 +37,8 @@ async function registrateMe(): Promise<void> {
     }
     try {
         let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false, profile_img.src, new Array<Chat>());
-        newUser.pushUser();
-        document.getElementsByClassName("content")[0].innerHTML = "You have been successfull registrated! Please wait for the redirect.";
+        showLoadingOverlay();
+        await newUser.pushUser();
     } catch (error: string | any) {
         alert('Error pushing user:' + (error.toString() as string));
         // Handle error, such as informing the user about the issue

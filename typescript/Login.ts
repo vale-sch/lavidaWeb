@@ -1,5 +1,5 @@
 import { onStartChatManager } from "./ChatManager.js";
-import { cleanLogin, createChatPage } from "./SiteChanger.js";
+import { cleanLogin, createChatPage, hideLoadingOverlay, showLoadingOverlay } from "./SiteChanger.js";
 import { connectClientID } from "./SocketConnection.js";
 import { User } from "./User.js";
 
@@ -44,12 +44,14 @@ async function checkCredentials() {
         }
     }
     if (login) {
+        showLoadingOverlay();
         document.removeEventListener('keydown', eventOnEnter);
         cleanLogin();
         createChatPage();
         connectClientID(User.me.id);
+
+        await User.fetchUsers();
         onStartChatManager();
-        User.fetchUsers();
     } else
         alert("Wrong Username or Password, try again.");
 }

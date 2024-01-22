@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { User } from "./User.js";
+import { showLoadingOverlay } from "./SiteChanger.js";
 let buttonDiv = document.getElementById("registration");
 let shuffleButton = document.getElementById("shuffle");
 let profile_img = document.getElementById("profile_image");
@@ -18,11 +19,14 @@ if (buttonDiv != null) {
             registrateMe();
         }
     }));
+    if (shuffleButton != null) {
+        shuffleButton.addEventListener("click", shuffleImages);
+        shuffleImages();
+    }
 }
-if (shuffleButton != null) {
-    shuffleButton.addEventListener("click", shuffleImages);
-    shuffleImages();
-}
+// Example usage:
+// Call showLoadingOverlay() when you want to start loading.
+// Call hideLoadingOverlay() when your loading process is complete.
 function registrateMe() {
     return __awaiter(this, void 0, void 0, function* () {
         let nameValue = document.getElementById("name").value;
@@ -33,8 +37,8 @@ function registrateMe() {
         }
         try {
             let newUser = new User(Math.floor((Date.now() + Math.random()) / 10000), nameValue, passwordValue, false, profile_img.src, new Array());
-            newUser.pushUser();
-            document.getElementsByClassName("content")[0].innerHTML = "You have been successfull registrated! Please wait for the redirect.";
+            showLoadingOverlay();
+            yield newUser.pushUser();
         }
         catch (error) {
             alert('Error pushing user:' + error.toString());

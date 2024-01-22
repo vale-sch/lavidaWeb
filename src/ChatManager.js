@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { Chat } from "./Chat.js";
 import { ChatElement } from "./ChatElement.js";
 import { ChatHistory } from "./ChatHistory.js";
+import { hideLoadingOverlay, showLoadingOverlay } from "./SiteChanger.js";
 import { socket } from "./SocketConnection.js";
 import { User } from "./User.js";
 let msgField;
@@ -38,7 +39,7 @@ export function onStartChatManager() {
     requestChats = document.getElementById("requestChats");
     socket.emit("newChatPartner", User.me);
     generateAllPossibleChats();
-    addDeleteButton();
+    appendDeleteButtonToEvent();
     sendButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
         if (msgField.value.trim() !== "") {
             let msgToSend = msgField.value;
@@ -68,12 +69,13 @@ export function onStartChatManager() {
         User.usersDB.forEach(user => {
             if (user.id == newUser.id) {
                 isNewUser = false;
-                User.fetchUsers();
             }
         });
         if (isNewUser) {
+            yield User.fetchUsers();
             yield delay(1000);
             yield User.updateMe();
+            yield delay(500);
             requestChats.innerHTML = "";
             savedChats.innerHTML = "";
             activeUsers.innerHTML = "";
@@ -81,6 +83,7 @@ export function onStartChatManager() {
         }
     }));
     socket.on(`${User.me.name}`, (chatRequestUser) => __awaiter(this, void 0, void 0, function* () {
+        yield User.updateMe();
         yield delay(1500);
         yield User.updateMe();
         requestChats.innerHTML = "";
@@ -89,18 +92,25 @@ export function onStartChatManager() {
         generateAllPossibleChats();
     }));
     socket.on(`${User.me.name}toDelete`, (chatToDelete) => __awaiter(this, void 0, void 0, function* () {
-        yield delay(1000);
+        if (chatHistory)
+            if (chatToDelete == chatHistory.chat_id)
+                showLoadingOverlay();
+        yield User.updateMe();
+        yield delay(1200);
         yield User.updateMe();
         requestChats.innerHTML = "";
         savedChats.innerHTML = "";
         activeUsers.innerHTML = "";
-        if (chatToDelete == chatHistory.chat_id) {
-            chatsHandler.innerHTML = "";
-            chatNameField.innerHTML = "LaVida Chat";
-            deleteChatButton.style.visibility = "hidden";
-        }
+        if (chatHistory)
+            if (chatToDelete == chatHistory.chat_id) {
+                chatsHandler.innerHTML = "";
+                chatNameField.innerHTML = "LaVida Chat";
+                deleteChatButton.style.visibility = "hidden";
+            }
         generateAllPossibleChats();
+        hideLoadingOverlay();
     }));
+    hideLoadingOverlay();
 }
 function generateAllPossibleChats() {
     let activeChats = new Array();
@@ -164,6 +174,7 @@ function generateAllPossibleChats() {
 }
 let activeChatListener = function (userLiElement, user) {
     return __awaiter(this, void 0, void 0, function* () {
+        showLoadingOverlay();
         if (currentlySelectedChat)
             currentlySelectedChat.classList.remove('highlight');
         yield User.updateMe();
@@ -208,6 +219,7 @@ let activeChatListener = function (userLiElement, user) {
         socket.emit("startChat", chatID, User.me.id);
         socket.emit("newChatRequest", usersInfo);
         chatStream(chatHistory.chat_id);
+        hideLoadingOverlay();
         yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, false), User.me.id);
         yield User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, true), user.id);
         makeDeleteButtonVisible();
@@ -215,6 +227,7 @@ let activeChatListener = function (userLiElement, user) {
 };
 let savedChatListener = function (userLiElement, chatID) {
     return __awaiter(this, void 0, void 0, function* () {
+        showLoadingOverlay();
         if (currentlySelectedChat) {
             currentlySelectedChat.classList.remove('highlight');
         }
@@ -237,11 +250,13 @@ let savedChatListener = function (userLiElement, chatID) {
         });
         socket.emit("startChat", chatHistory.chat_id, User.me.id);
         chatStream(chatHistory.chat_id);
+        hideLoadingOverlay();
         makeDeleteButtonVisible();
     });
 };
 let requestedChatListener = function (userLiElement, chatID, chat, user) {
     return __awaiter(this, void 0, void 0, function* () {
+        showLoadingOverlay();
         if (currentlySelectedChat) {
             currentlySelectedChat.classList.remove('highlight');
         }
@@ -268,6 +283,7 @@ let requestedChatListener = function (userLiElement, chatID, chat, user) {
         });
         socket.emit("startChat", chatHistory.chat_id, User.me.id);
         chatStream(chatHistory.chat_id);
+        hideLoadingOverlay();
         chat.isAccepted = true;
         chat.isRequested = false;
         yield User.updateChatsInUser(chat, User.me.id);
@@ -279,10 +295,11 @@ let requestedChatListener = function (userLiElement, chatID, chat, user) {
 function makeDeleteButtonVisible() {
     deleteChatButton.style.visibility = "visible";
 }
-function addDeleteButton() {
+function appendDeleteButtonToEvent() {
     deleteChatButton.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
         var _a;
         let user;
+        showLoadingOverlay();
         if (chatHistory) {
             user = User.usersDB.find(user => user.name == chatHistory.participants.find(participant => participant != User.me.name));
         }
@@ -291,9 +308,6 @@ function addDeleteButton() {
         //update the user and his participant in the database
         if (user)
             socket.emit("deleteChat", user.name, chatHistory.chat_id);
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
         chatsHandler.innerHTML = "";
         chatNameField.innerHTML = "LaVida Chat";
         deleteChatButton.style.visibility = "hidden";
@@ -303,6 +317,10 @@ function addDeleteButton() {
         yield User.fetchUsers();
         yield delay(200);
         yield User.updateMe();
+        hideLoadingOverlay();
+        requestChats.innerHTML = "";
+        savedChats.innerHTML = "";
+        activeUsers.innerHTML = "";
         generateAllPossibleChats();
     }));
 }

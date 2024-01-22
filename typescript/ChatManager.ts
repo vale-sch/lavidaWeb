@@ -1,6 +1,7 @@
 import { Chat } from "./Chat.js";
 import { ChatElement } from "./ChatElement.js";
 import { ChatHistory, Message } from "./ChatHistory.js";
+import { hideLoadingOverlay, showLoadingOverlay } from "./SiteChanger.js";
 import { socket } from "./SocketConnection.js";
 import { User } from "./User.js";
 
@@ -37,7 +38,7 @@ export function onStartChatManager() {
     requestChats = <HTMLUListElement>document.getElementById("requestChats");
     socket.emit("newChatPartner", User.me);
     generateAllPossibleChats();
-    addDeleteButton();
+    appendDeleteButtonToEvent();
 
     sendButton.addEventListener("click", async () => {
         if (msgField.value.trim() !== "") {
@@ -71,12 +72,14 @@ export function onStartChatManager() {
         User.usersDB.forEach(user => {
             if (user.id == newUser.id) {
                 isNewUser = false;
-                User.fetchUsers();
+
             }
         });
         if (isNewUser) {
+            await User.fetchUsers();
             await delay(1000);
             await User.updateMe();
+            await delay(500);
 
             requestChats.innerHTML = "";
             savedChats.innerHTML = "";
@@ -85,6 +88,7 @@ export function onStartChatManager() {
         }
     });
     socket.on(`${User.me.name}`, async (chatRequestUser: string) => {
+        await User.updateMe();
         await delay(1500);
         await User.updateMe();
         requestChats.innerHTML = "";
@@ -94,21 +98,27 @@ export function onStartChatManager() {
     });
 
     socket.on(`${User.me.name}toDelete`, async (chatToDelete: string) => {
-        await delay(1000);
+        if (chatHistory)
+            if (chatToDelete == chatHistory.chat_id)
+                showLoadingOverlay();
+        await User.updateMe();
+        await delay(1200);
         await User.updateMe();
         requestChats.innerHTML = "";
         savedChats.innerHTML = "";
         activeUsers.innerHTML = "";
-        if (chatToDelete == chatHistory.chat_id) {
-            chatsHandler.innerHTML = "";
-            chatNameField.innerHTML = "LaVida Chat";
-            deleteChatButton.style.visibility = "hidden";
-        }
-        generateAllPossibleChats();
+        if (chatHistory)
+            if (chatToDelete == chatHistory.chat_id) {
 
+                chatsHandler.innerHTML = "";
+                chatNameField.innerHTML = "LaVida Chat";
+                deleteChatButton.style.visibility = "hidden";
+            }
+        generateAllPossibleChats();
+        hideLoadingOverlay();
 
     });
-
+    hideLoadingOverlay();
 }
 function generateAllPossibleChats(): void {
     let activeChats: string[] = new Array<string>();
@@ -172,7 +182,7 @@ function generateAllPossibleChats(): void {
 }
 
 let activeChatListener = async function (userLiElement: HTMLLIElement, user: User) {
-
+    showLoadingOverlay();
     if (currentlySelectedChat)
         currentlySelectedChat.classList.remove('highlight');
 
@@ -222,6 +232,7 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     socket.emit("newChatRequest", usersInfo);
 
     chatStream(chatHistory.chat_id);
+    hideLoadingOverlay();
     await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, false), User.me.id);
     await User.updateChatsInUser(new Chat(chatHistory.chat_id, chatHistory.participants, false, true), user.id);
 
@@ -230,6 +241,7 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
 };
 
 let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: string) {
+    showLoadingOverlay();
     if (currentlySelectedChat) {
         currentlySelectedChat.classList.remove('highlight');
     }
@@ -258,13 +270,14 @@ let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: st
     })
     socket.emit("startChat", chatHistory.chat_id, User.me.id);
     chatStream(chatHistory.chat_id);
+    hideLoadingOverlay();
     makeDeleteButtonVisible();
 
 };
 
 
 let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID: string, chat: Chat, user: User) {
-
+    showLoadingOverlay();
     if (currentlySelectedChat) {
         currentlySelectedChat.classList.remove('highlight');
     }
@@ -298,6 +311,7 @@ let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID
     })
     socket.emit("startChat", chatHistory.chat_id, User.me.id);
     chatStream(chatHistory.chat_id);
+    hideLoadingOverlay();
     chat.isAccepted = true;
     chat.isRequested = false;
     await User.updateChatsInUser(chat, User.me.id);
@@ -310,10 +324,10 @@ let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID
 function makeDeleteButtonVisible() {
     deleteChatButton.style.visibility = "visible";
 }
-function addDeleteButton() {
+function appendDeleteButtonToEvent() {
     deleteChatButton.addEventListener("click", async () => {
         let user: User | undefined;
-
+        showLoadingOverlay();
         if (chatHistory) {
             user = User.usersDB.find(user => user.name == chatHistory.participants.find(participant => participant != User.me.name));
         }
@@ -327,9 +341,7 @@ function addDeleteButton() {
         if (user)
             socket.emit("deleteChat", user.name, chatHistory.chat_id);
 
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+
         chatsHandler.innerHTML = "";
         chatNameField.innerHTML = "LaVida Chat";
         deleteChatButton.style.visibility = "hidden";
@@ -339,9 +351,14 @@ function addDeleteButton() {
         await User.removeChatFromUser(chatHistory.chat_id, User.me.id);
 
 
+
         await User.fetchUsers();
         await delay(200);
         await User.updateMe();
+        hideLoadingOverlay();
+        requestChats.innerHTML = "";
+        savedChats.innerHTML = "";
+        activeUsers.innerHTML = "";
         generateAllPossibleChats();
     });
 }

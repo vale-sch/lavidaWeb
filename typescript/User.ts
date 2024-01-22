@@ -1,4 +1,7 @@
-import { Chat } from "./Chat";
+import { Chat } from "./Chat.js";
+
+import { hideLoadingOverlay } from "./SiteChanger.js";
+
 
 export class User {
     public static usersDB: User[] = [];
@@ -73,8 +76,10 @@ export class User {
             });
             if (response.status === 201) {
                 await response.json();
+                hideLoadingOverlay();
+
                 window.location.replace("laVidaChat.html");
-                alert("Registration successfull! Redirecting to login page")
+                alert("You have successfully registered!");
             } else {
                 let data = await response.json();
                 console.log(`Error: ${data.error}`);
