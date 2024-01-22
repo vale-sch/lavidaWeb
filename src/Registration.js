@@ -16,7 +16,7 @@ if (buttonDiv != null) {
     buttonDiv.addEventListener("click", registrateMe);
     document.addEventListener('keydown', (e) => __awaiter(void 0, void 0, void 0, function* () {
         if (e.key === 'Enter') {
-            registrateMe();
+            yield registrateMe();
         }
     }));
     if (shuffleButton != null) {
