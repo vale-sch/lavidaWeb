@@ -1,6 +1,7 @@
 
 <p align="center">
   <img src="logo/logo_transparent.png" alt="laVida Logo" width="400" />
+
 </p>
 
 # Welcome & how to use
@@ -23,14 +24,16 @@ The repository contains all the client-side code. From the displaying frontend c
 - No Mobile Phone Number Required | Web Client only
 
 ### Web app process
-<img src="Architecture_Overview_LaVida.png" alt="image" width="300" height="auto">
+<p align="center">
+	  <img src="diagram/Architecture_Overview_LaVida.png" alt="image" width="1200" height="auto">
+</p>
 
 - If no account exists yet, the user must create a new account via the registration process. This is saved in the Postgres database with the credentials and other important information for the chat to function later. 
 	- [Registrierung Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/typescript/Registration.ts) |  [Registrierung HTML](https://github.com/vale-sch/lavidaWeb/blob/main/website/html/registration_page.html)
 	- [Registration - Deployed](https://vale-sch.github.io/lavidaWeb/website/html/registration_page.html)
 	
 - The user is then redirected back to the login page [Login Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/website/html/laVidaChat.html)| [Login Deployed](https://vale-sch.github.io/lavidaWeb/website/html/laVidaChat.html) . The user can then log in with the saved credentials. The chat overview / main page of the chat is then displayed [Chat Manager Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/typescript/ChatManager.ts). 
-#### Ablauf nach dem Login 
+#### Process after Login 
 
 1. Connection to WebSocket is established [Web Socket Repo](https://github.com/vale-sch/laVidaWebSocket), which was deployed on Render.com. As the client-side project is a one-pager application, the connection to the web socket is never interrupted in the best case scenario. 
 2. All available chat partners are fetched via Vercel's Postgres SQL database. At the same time, the stored account of the logged-in person is used to check with which persons there is already an existing chat and where there has not yet been any communication.
