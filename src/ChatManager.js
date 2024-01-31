@@ -19,6 +19,7 @@ let sendButton;
 let activeUsers;
 let savedChats;
 let requestChats;
+let chatImg;
 let chatElements = new Array();
 let chatNameField;
 let chatHistory;
@@ -34,6 +35,7 @@ export function onStartChatManager() {
     chatsHandler = document.getElementById("chatsHandler");
     sendButton = document.getElementById("sendButton");
     msgField = document.getElementsByClassName("message-input")[0].getElementsByTagName("textarea")[0];
+    chatImg = document.getElementById("chatImg");
     activeUsers = document.getElementById("activeUsers");
     savedChats = document.getElementById("savedChats");
     requestChats = document.getElementById("requestChats");
@@ -76,9 +78,7 @@ export function onStartChatManager() {
             yield delay(1000);
             yield User.updateMe();
             yield delay(500);
-            requestChats.innerHTML = "";
-            savedChats.innerHTML = "";
-            activeUsers.innerHTML = "";
+            removeChatMsgs();
             generateAllPossibleChats();
         }
     }));
@@ -86,9 +86,7 @@ export function onStartChatManager() {
         yield User.updateMe();
         yield delay(1500);
         yield User.updateMe();
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+        removeChatMsgs();
         generateAllPossibleChats();
     }));
     socket.on(`${User.me.name}toDelete`, (chatToDelete) => __awaiter(this, void 0, void 0, function* () {
@@ -98,19 +96,23 @@ export function onStartChatManager() {
         yield User.updateMe();
         yield delay(1200);
         yield User.updateMe();
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+        removeChatMsgs();
         if (chatHistory)
             if (chatToDelete == chatHistory.chat_id) {
                 chatsHandler.innerHTML = "";
-                chatNameField.innerHTML = "LaVida Chat";
+                chatNameField.innerHTML = "Chat";
                 deleteChatButton.style.visibility = "hidden";
+                chatImg.src = "../../logo/logo_transparent.png";
             }
         generateAllPossibleChats();
         hideLoadingOverlay();
     }));
     hideLoadingOverlay();
+}
+function removeChatMsgs() {
+    requestChats.innerHTML = "";
+    savedChats.innerHTML = "";
+    activeUsers.innerHTML = "";
 }
 function generateAllPossibleChats() {
     let activeChats = new Array();
@@ -213,6 +215,7 @@ let activeChatListener = function (userLiElement, user) {
         }
         displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants);
         chatNameField.innerHTML = user.name;
+        chatImg.src = user.profileImgURL;
         let usersInfo = new Array();
         usersInfo.push(User.me.name);
         usersInfo.push(user.name);
@@ -247,6 +250,8 @@ let savedChatListener = function (userLiElement, chatID) {
         chatHistory.participants.find(participant => {
             if (participant != User.me.name)
                 chatNameField.innerHTML = participant;
+            let user = User.usersDB.find(user => user.name == participant);
+            chatImg.src = user.profileImgURL;
         });
         socket.emit("startChat", chatHistory.chat_id, User.me.id);
         chatStream(chatHistory.chat_id);
@@ -282,6 +287,7 @@ let requestedChatListener = function (userLiElement, chatID, chat, user) {
                 chatNameField.innerHTML = participant;
         });
         socket.emit("startChat", chatHistory.chat_id, User.me.id);
+        chatImg.src = user.profileImgURL;
         chatStream(chatHistory.chat_id);
         hideLoadingOverlay();
         chat.isAccepted = true;
@@ -308,20 +314,19 @@ function appendDeleteButtonToEvent() {
         //update the user and his participant in the database
         if (user)
             socket.emit("deleteChat", user.name, chatHistory.chat_id);
-        chatsHandler.innerHTML = "";
-        chatNameField.innerHTML = "LaVida Chat";
-        deleteChatButton.style.visibility = "hidden";
         //get the user of the currently selected chat
         yield User.removeChatFromUser(chatHistory.chat_id, (_a = user === null || user === void 0 ? void 0 : user.id) !== null && _a !== void 0 ? _a : 0);
         yield User.removeChatFromUser(chatHistory.chat_id, User.me.id);
+        chatsHandler.innerHTML = "";
+        chatNameField.innerHTML = "Chat";
+        deleteChatButton.style.visibility = "hidden";
         yield User.fetchUsers();
         yield delay(200);
         yield User.updateMe();
-        hideLoadingOverlay();
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+        chatImg.src = "../../logo/logo_transparent.png";
+        removeChatMsgs();
         generateAllPossibleChats();
+        hideLoadingOverlay();
     }));
 }
 export function displayReceivedMsg(senderID, message, timeSent) {

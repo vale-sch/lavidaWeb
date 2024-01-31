@@ -44,7 +44,12 @@
  .hidden {
      visibility: hidden;
  }
-
+#chatImg{
+    width: 60px;
+    height:60px;
+    margin-right: 10px;
+    border-radius: 16px;
+}
 .chat-container {
     display: flex;
     height: 98vh;
@@ -130,18 +135,16 @@ h3 {
 }
 
 .chat-header {
-    padding: 20px;
+    display: flex;
+    align-items: center;
+    padding: 5px;
     border-bottom: 5px solid var(--dark-blue);
-        font-size: 26px;
-        font-weight: bolder;
+    font-size: 24px;
+    font-weight: bolder;
     /* Highlight header */
 }
 
-.chat-header h2 {
-    margin: 0;
-    color: #52658f;
-    /* Color for partner's chat name */
-}
+
 
 .messages {
     flex: 1;
@@ -282,7 +285,7 @@ h3 {
 #deleteBtn {
     position: absolute;
     border: none;
-    background-color: #007bff;
+    background-color: #ff000077;
     color: white;
     font-weight: bolder;
     border-radius: 8px;
@@ -296,11 +299,12 @@ h3 {
 }
 #chatHeaderH2{
     color: #000;
-    font-size: larger;
+    font-size: xx-large
 }
 #deleteBtn:hover {
-    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 #007bff94;
+    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 #ffffff56;
     border-color: #000;
+    background-color:#ff0000;
     border-width: thick;
 }
 .message-input button {

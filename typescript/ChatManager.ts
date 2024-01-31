@@ -15,7 +15,7 @@ let sendButton: HTMLButtonElement
 let activeUsers: HTMLUListElement;
 let savedChats: HTMLUListElement;
 let requestChats: HTMLUListElement;
-
+let chatImg: HTMLImageElement;
 let chatElements: Array<ChatElement> = new Array<ChatElement>();
 let chatNameField: HTMLHeadElement;
 
@@ -32,7 +32,7 @@ export function onStartChatManager() {
     chatsHandler = <HTMLDivElement>document.getElementById("chatsHandler");
     sendButton = document.getElementById("sendButton") as HTMLButtonElement;
     msgField = <HTMLTextAreaElement>document.getElementsByClassName("message-input")[0].getElementsByTagName("textarea")[0];
-
+    chatImg = <HTMLImageElement>document.getElementById("chatImg");
     activeUsers = <HTMLUListElement>document.getElementById("activeUsers");
     savedChats = <HTMLUListElement>document.getElementById("savedChats");
     requestChats = <HTMLUListElement>document.getElementById("requestChats");
@@ -81,9 +81,7 @@ export function onStartChatManager() {
             await User.updateMe();
             await delay(500);
 
-            requestChats.innerHTML = "";
-            savedChats.innerHTML = "";
-            activeUsers.innerHTML = "";
+            removeChatMsgs();
             generateAllPossibleChats();
         }
     });
@@ -91,9 +89,7 @@ export function onStartChatManager() {
         await User.updateMe();
         await delay(1500);
         await User.updateMe();
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+        removeChatMsgs();
         generateAllPossibleChats();
     });
 
@@ -104,21 +100,25 @@ export function onStartChatManager() {
         await User.updateMe();
         await delay(1200);
         await User.updateMe();
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+        removeChatMsgs();
         if (chatHistory)
             if (chatToDelete == chatHistory.chat_id) {
-
                 chatsHandler.innerHTML = "";
-                chatNameField.innerHTML = "LaVida Chat";
+                chatNameField.innerHTML = "Chat";
                 deleteChatButton.style.visibility = "hidden";
+                chatImg.src = "../../logo/logo_transparent.png";
+
             }
         generateAllPossibleChats();
         hideLoadingOverlay();
 
     });
     hideLoadingOverlay();
+}
+function removeChatMsgs() {
+    requestChats.innerHTML = "";
+    savedChats.innerHTML = "";
+    activeUsers.innerHTML = "";
 }
 function generateAllPossibleChats(): void {
     let activeChats: string[] = new Array<string>();
@@ -225,6 +225,7 @@ let activeChatListener = async function (userLiElement: HTMLLIElement, user: Use
     }
 
     displayedMessages = ChatHistory.createNew(chatHistory.chat_id, User.me.name, chatHistory.participants); chatNameField.innerHTML = user.name;
+    chatImg.src = user.profileImgURL;
     let usersInfo: string[] = new Array<string>();
     usersInfo.push(User.me.name);
     usersInfo.push(user.name);
@@ -266,8 +267,11 @@ let savedChatListener = async function (userLiElement: HTMLLIElement, chatID: st
     chatHistory.participants.find(participant => {
         if (participant != User.me.name)
             chatNameField.innerHTML = participant;
+        let user: User = <User>User.usersDB.find(user => user.name == participant);
+        chatImg.src = user.profileImgURL;
 
     })
+
     socket.emit("startChat", chatHistory.chat_id, User.me.id);
     chatStream(chatHistory.chat_id);
     hideLoadingOverlay();
@@ -310,6 +314,7 @@ let requestedChatListener = async function (userLiElement: HTMLLIElement, chatID
 
     })
     socket.emit("startChat", chatHistory.chat_id, User.me.id);
+    chatImg.src = user.profileImgURL;
     chatStream(chatHistory.chat_id);
     hideLoadingOverlay();
     chat.isAccepted = true;
@@ -342,24 +347,25 @@ function appendDeleteButtonToEvent() {
             socket.emit("deleteChat", user.name, chatHistory.chat_id);
 
 
-        chatsHandler.innerHTML = "";
-        chatNameField.innerHTML = "LaVida Chat";
-        deleteChatButton.style.visibility = "hidden";
+
 
         //get the user of the currently selected chat
         await User.removeChatFromUser(chatHistory.chat_id, user?.id ?? 0);
         await User.removeChatFromUser(chatHistory.chat_id, User.me.id);
 
-
+        chatsHandler.innerHTML = "";
+        chatNameField.innerHTML = "Chat";
+        deleteChatButton.style.visibility = "hidden";
 
         await User.fetchUsers();
         await delay(200);
         await User.updateMe();
-        hideLoadingOverlay();
-        requestChats.innerHTML = "";
-        savedChats.innerHTML = "";
-        activeUsers.innerHTML = "";
+
+        chatImg.src = "../../logo/logo_transparent.png";
+        removeChatMsgs();
         generateAllPossibleChats();
+        hideLoadingOverlay();
+
     });
 }
 

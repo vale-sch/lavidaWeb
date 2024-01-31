@@ -82,8 +82,12 @@ function generateChatContainer(): HTMLElement {
     // Chat window
     let chatWindow = createElementWithClasses('div', { class: 'chat-window' }, ['full-height']);
     let chatHeader = createElement('div', { class: 'chat-header' });
+    let chatImg = createElement('img', { id: 'chatImg' }) as HTMLImageElement;
+    chatImg.src = "../../logo/logo_transparent.png";
     let chatHeaderH2 = createElement('h2', { id: 'chatHeaderH2' });
-    chatHeaderH2.innerHTML = 'La Vida Chats';
+    chatHeaderH2.innerHTML = 'Chat';
+    chatHeader.appendChild(chatImg);
+
     chatHeader.appendChild(chatHeaderH2);
 
     let deleteChatButton = createElement('button', { id: 'deleteBtn' });
