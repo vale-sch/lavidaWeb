@@ -29,7 +29,7 @@ The repository contains all the client-side code. From the displaying frontend c
 </p>
 
 - If no account exists yet, the user must create a new account via the registration process. This is saved in the Postgres database with the credentials and other important information for the chat to function later. 
-	- [Registrierung Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/typescript/Registration.ts) |  [Registrierung HTML](https://github.com/vale-sch/lavidaWeb/blob/main/website/html/registration_page.html)
+	- [Registration Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/typescript/Registration.ts) |  [Registration HTML](https://github.com/vale-sch/lavidaWeb/blob/main/website/html/registration_page.html)
 	- [Registration - Deployed](https://vale-sch.github.io/lavidaWeb/website/html/registration_page.html)
 	
 - The user is then redirected back to the login page [Login Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/website/html/laVidaChat.html)| [Login Deployed](https://vale-sch.github.io/lavidaWeb/website/html/laVidaChat.html) . The user can then log in with the saved credentials. The chat overview / main page of the chat is then displayed [Chat Manager Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/typescript/ChatManager.ts). 
