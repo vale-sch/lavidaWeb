@@ -29,6 +29,7 @@ The repository contains all the client-side code. From the displaying frontend c
 <p align="center">
 	  <img src="diagram/Architecture_Overview_LaVida.png" alt="image" width="1200" height="auto">
 </p>
+#### Process before Login 
 
 - If no account exists yet, the user must create a new account via the registration process. This is saved in the Postgres database with the credentials and other important information for the chat to function later. 
 	- [Registration Typescript](https://github.com/vale-sch/lavidaWeb/blob/main/typescript/Registration.ts) |  [Registration HTML](https://github.com/vale-sch/lavidaWeb/blob/main/website/html/registration_page.html)
