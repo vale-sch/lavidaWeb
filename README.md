@@ -16,14 +16,16 @@
  - [LaVida Server](https://github.com/vale-sch/lavidaServer) -> linked and deployed on Vercel
  - [LaVida WebSocket](https://github.com/vale-sch/laVidaWebSocket) -> linked and deployed on Render
 
-The repository contains all the client-side code. From the displaying frontend code (*HTML, CSS, Typescript*), to addressing the serverless API endpoints of PostgresSQL (Vercel), Supabase DB and the WebSocket.  [LaVida Web Repo](https://github.com/vale-sch/lavidaWeb)
-
+# Documentation
 #### Special features
 - Realtime Messaging via Supabase Realtime DB functionality. 
 - Realtime Updating of whole Chat States (Active, Requested, Deleted)
 - No Mobile Phone Number Required | Web Client only
 
+
 ### Web app process
+The repository contains all the client-side code. From the displaying frontend code (*HTML, CSS, Typescript*), to addressing the serverless API endpoints of PostgresSQL (Vercel), Supabase DB and the WebSocket.  [LaVida Web Repo](https://github.com/vale-sch/lavidaWeb)
+
 <p align="center">
 	  <img src="diagram/Architecture_Overview_LaVida.png" alt="image" width="1200" height="auto">
 </p>
